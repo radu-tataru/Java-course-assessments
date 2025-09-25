@@ -248,7 +248,7 @@ class AssessmentEngine {
                         </div>
                     </div>
                     <div class="code-editor-content">
-                        <textarea data-question-input placeholder="// Write your Java code here\\npublic class Solution {\\n    \\n}">${savedAnswer}</textarea>
+                        <textarea data-question-input placeholder="// Write only the method body content here\\n// Example for proper indentation:\\n        int count = 0;\\n        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {\\n            String line;\\n            while ((line = reader.readLine()) != null) {\\n                // your logic here\\n            }\\n        }\\n        return count;">${savedAnswer}</textarea>
                     </div>
                 </div>
 

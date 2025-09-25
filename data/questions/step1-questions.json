@@ -96,7 +96,8 @@
         "Return an int representing the count of lines containing the search word",
         "Handle IOException properly with try-catch",
         "Search should be case-insensitive (use toLowerCase())",
-        "Don't write 'public class' - just the method implementation"
+        "Don't write 'public class' - just the method implementation",
+        "⚠️ IMPORTANT: All your code should be properly indented as method body content"
       ],
       "template": [
         "import java.io.*;",
@@ -165,7 +166,8 @@
         "Parse JSON using JSONArray and JSONObject",
         "Return List<String> containing all URLs from the JSON array",
         "Handle exceptions properly with try-catch",
-        "Don't write 'public class' - just the method implementation"
+        "Don't write 'public class' - just the method implementation",
+        "⚠️ IMPORTANT: All your code should be properly indented as method body content"
       ],
       "template": [
         "import java.io.*;",
