@@ -1114,8 +1114,13 @@ class AssessmentEngine {
                 questionType: question.type,
                 answer: answer,
                 answerType: typeof answer,
+                isArray: Array.isArray(answer),
+                arrayContent: Array.isArray(answer) ? answer : null,
                 answers: question.answers.map((a, i) => `${i}: ${a.text}`),
-                expectedText: question.answers[answer]?.text
+                expectedText: Array.isArray(answer) ?
+                    answer.map(idx => question.answers[idx]?.text).join(', ') :
+                    question.answers[answer]?.text,
+                result: 'ABOUT TO RETURN'
             });
         }
 
