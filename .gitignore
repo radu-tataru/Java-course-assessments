@@ -19,6 +19,8 @@ Thumbs.db
 # Environment
 .env
 config.local.js
+backend/.env
+backend/node_modules/
 
 # Student submissions (keep structure, not data)
 data/submissions/*.json
