@@ -240,16 +240,33 @@ class Judge0Integration {
         let output = '';
         let error = '';
 
+        // Safely decode Base64, handle both encoded and plain text
+        const safeDecode = (str) => {
+            if (!str) return '';
+            try {
+                // Check if it looks like Base64 (only alphanumeric + / + = characters)
+                if (/^[A-Za-z0-9+/]*={0,2}$/.test(str)) {
+                    return atob(str);
+                } else {
+                    // Already decoded or not Base64
+                    return str;
+                }
+            } catch (e) {
+                console.warn('Failed to decode Base64, using raw string:', str);
+                return str;
+            }
+        };
+
         if (response.stdout) {
-            output = atob(response.stdout);
+            output = safeDecode(response.stdout);
         }
 
         if (response.stderr) {
-            error = atob(response.stderr);
+            error = safeDecode(response.stderr);
         }
 
         if (response.compile_output) {
-            const compileError = atob(response.compile_output);
+            const compileError = safeDecode(response.compile_output);
             if (compileError.trim()) {
                 error = compileError;
             }

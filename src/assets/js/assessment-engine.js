@@ -356,6 +356,64 @@ class AssessmentEngine {
     }
 
     /**
+     * Execute code for coding challenges
+     */
+    async executeCode(question) {
+        const textarea = this.container.querySelector('[data-question-input]');
+        if (!textarea) return;
+
+        const userCode = textarea.value.trim();
+        if (!userCode) {
+            this.showExecutionResult('Please enter some code to execute.', false);
+            return;
+        }
+
+        // Show loading state
+        const executeBtn = this.container.querySelector('[data-execute-code]');
+        const originalBtnText = executeBtn.innerHTML;
+        executeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Executing...';
+        executeBtn.disabled = true;
+
+        try {
+            // Initialize Judge0 if not already done
+            if (!this.judge0) {
+                this.judge0 = new AssessmentJudge0();
+            }
+
+            // Execute the code
+            const result = await this.judge0.executeAssessmentCode(question, userCode);
+            this.showExecutionResult(result.feedback || 'Code executed', result.success, result);
+
+        } catch (error) {
+            console.error('Code execution failed:', error);
+            this.showExecutionResult('Code execution failed: ' + error.message, false);
+        } finally {
+            // Restore button state
+            executeBtn.innerHTML = originalBtnText;
+            executeBtn.disabled = false;
+        }
+    }
+
+    /**
+     * Show execution result in the UI
+     */
+    showExecutionResult(message, isSuccess, fullResult = null) {
+        let resultContainer = this.container.querySelector('[data-execution-result]');
+        if (!resultContainer) return;
+
+        resultContainer.style.display = 'block';
+        resultContainer.className = `execution-result alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
+
+        let html = `<strong>${isSuccess ? '✅ Success' : '❌ Error'}</strong><br>${message}`;
+
+        if (fullResult && fullResult.output) {
+            html += `<br><br><strong>Output:</strong><br><pre>${fullResult.output}</pre>`;
+        }
+
+        resultContainer.innerHTML = html;
+    }
+
+    /**
      * Handle answer changes and save progress
      */
     handleAnswerChange() {
