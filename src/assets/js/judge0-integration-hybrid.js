@@ -49,7 +49,7 @@ class Judge0Integration {
 
         // For GitHub Pages or other deployments with Vercel backend
         // Update this with your actual Vercel URL
-        return 'https://your-app-name.vercel.app';
+        return 'https://java-assesments-backend.vercel.app';
     }
 
     /**
