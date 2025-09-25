@@ -54,6 +54,7 @@ export default async function handler(req, res) {
                 source_code: encoded,
                 language_id: language_id || 62, // Java
                 stdin: Buffer.from(stdin || '').toString('base64'),
+                base64_encoded: true, // Tell Judge0 that source_code is Base64 encoded
                 cpu_time_limit: 10,
                 memory_limit: 128000,
                 wall_time_limit: 15
