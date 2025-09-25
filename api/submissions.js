@@ -75,8 +75,8 @@ export default async function handler(req, res) {
             }
 
             // If language_id is not Java (62), respect the original language
-            if (submissionBody.language_id !== 62) {
-                console.log(`Using specified language ID ${submissionBody.language_id}...`);
+            if (submissionBody.language_id !== 62 && submissionBody.language_id) {
+                console.log(`Using specified language ID ${submissionBody.language_id} with base64_encoded: ${submissionBody.base64_encoded}...`);
 
                 try {
                     const directResponse = await fetch('https://ce.judge0.com/submissions', {

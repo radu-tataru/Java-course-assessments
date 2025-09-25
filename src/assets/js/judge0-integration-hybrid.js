@@ -438,6 +438,47 @@ class Judge0Integration {
      */
     async testWithPython() {
         console.log('Testing Judge0 with Python...');
+
+        // Test 1: Direct to ce.judge0.com with plain text
+        try {
+            console.log('Testing direct Judge0 with plain text Python...');
+            const pythonCode = 'print("Hello from Python")';
+            const directResponse = await fetch('https://ce.judge0.com/submissions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    source_code: pythonCode,
+                    language_id: 71, // Python 3
+                    stdin: ''
+                })
+            });
+
+            if (directResponse.ok) {
+                const directData = await directResponse.json();
+                console.log('Direct Python test successful:', directData);
+
+                // Check result after delay
+                setTimeout(async () => {
+                    try {
+                        const resultResponse = await fetch(`https://ce.judge0.com/submissions/${directData.token}`);
+                        if (resultResponse.ok) {
+                            const result = await resultResponse.json();
+                            console.log('Direct Python result:', result);
+                        }
+                    } catch (e) {
+                        console.log('Direct Python result check failed:', e);
+                    }
+                }, 3000);
+            } else {
+                console.log('Direct Python test failed:', await directResponse.text());
+            }
+        } catch (error) {
+            console.log('Direct Python test error:', error);
+        }
+
+        // Test 2: Via our backend (existing test)
         try {
             const pythonCode = 'print("Hello from Python")';
             const response = await fetch(`${this.backendUrl}/api/submissions`, {
