@@ -497,10 +497,12 @@ class AssessmentEngine {
         // For code completion, check if there's already a specific comment in the template
         // If so, don't add a generic placeholder
         if (question.type === CONFIG.QUESTION_TYPES.CODE_COMPLETION) {
-            const lineBeforeUserCode = templateString.split('{{USER_CODE}}')[0].split('\n').pop();
+            const lineBeforeUserCode = templateString.split('{{USER_CODE}}')[0].split('\n').pop().trim();
+            console.log('Debug - lineBeforeUserCode:', lineBeforeUserCode);
             if (lineBeforeUserCode && lineBeforeUserCode.includes('//') &&
                 (lineBeforeUserCode.includes('Complete') || lineBeforeUserCode.includes('Extract'))) {
                 // Template already has a specific instruction, just add minimal placeholder
+                console.log('Debug - Using empty placeholder for code completion');
                 return templateString.replace('{{USER_CODE}}', '');
             }
         }
