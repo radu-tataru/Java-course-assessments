@@ -583,6 +583,29 @@ class AssessmentEngine {
             methodBody = methodBody.replace('{{USER_CODE}}', '').trim();
             methodBody = methodBody.replace(/\/\*[^*]*\*+([^/*][^*]*\*+)*\//, '').trim(); // Remove all comments
 
+            // Special case: If method body still contains class structure,
+            // it means student submitted full template - extract the actual implementation
+            if (methodBody.includes('public class') || methodBody.includes('import ')) {
+                console.log('Method body contains full template structure, extracting actual user code...');
+
+                // Find the innermost method with the same signature
+                const innerMethodMatch = methodBody.match(/public\s+int\s+countLinesWithWord[^{]*\{([^}]*)\}/);
+                if (innerMethodMatch) {
+                    const innerCode = innerMethodMatch[1].trim();
+                    console.log('Found inner method implementation:', innerCode.length, 'chars');
+                    if (innerCode && innerCode !== '' && !innerCode.includes('{{USER_CODE}}')) {
+                        return innerCode;
+                    }
+                }
+
+                // Alternative: Look for specific patterns in user's actual implementation
+                const simpleReturnMatch = methodBody.match(/return\s+\d+\s*;/);
+                if (simpleReturnMatch) {
+                    console.log('Found simple return statement:', simpleReturnMatch[0]);
+                    return simpleReturnMatch[0].trim();
+                }
+            }
+
             // Clean up indentation - remove leading whitespace from each line
             const lines = methodBody.split('\n');
             const cleanedLines = lines.map(line => {
