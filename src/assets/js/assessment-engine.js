@@ -1107,8 +1107,8 @@ class AssessmentEngine {
      * Format answer for review display
      */
     formatAnswerForReview(question, answer) {
-        // Debug logging for Questions 1 and 5 to see what's happening
-        if (question.id === 'step1-q1' || question.id === 'step1-q5') {
+        // Debug logging for Questions 1, 5, and 6 to see what's happening
+        if (question.id === 'step1-q1' || question.id === 'step1-q5' || question.id === 'step1-q6') {
             console.log(`DEBUG - ${question.id} formatAnswerForReview:`, {
                 questionId: question.id,
                 questionType: question.type,
