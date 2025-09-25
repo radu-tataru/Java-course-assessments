@@ -1135,7 +1135,7 @@ class AssessmentEngine {
                             answer: answer,
                             firstIndex: answer[0],
                             textAtIndex: question.answers[answer[0]]?.text,
-                            allAnswers: question.answers
+                            allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
                         });
                     }
                     return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
@@ -1145,7 +1145,7 @@ class AssessmentEngine {
                     console.log(`DEBUG - ${question.id} NUMBER processing:`, {
                         answer: answer,
                         textAtIndex: question.answers[answer]?.text,
-                        allAnswers: question.answers
+                        allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
                     });
                 }
                 return question.answers[answer]?.text || `Option ${answer + 1}`;
@@ -1165,7 +1165,7 @@ class AssessmentEngine {
                             answer: answer,
                             firstIndex: answer[0],
                             textAtIndex: question.answers[answer[0]]?.text,
-                            allAnswers: question.answers
+                            allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
                         });
                     }
                     return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
@@ -1175,7 +1175,7 @@ class AssessmentEngine {
                     console.log(`DEBUG - ${question.id} CODE_READING NUMBER processing:`, {
                         answer: answer,
                         textAtIndex: question.answers[answer]?.text,
-                        allAnswers: question.answers
+                        allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
                     });
                 }
                 return question.answers[answer]?.text || answer;
