@@ -324,6 +324,49 @@ class Judge0Integration {
     }
 
     /**
+     * Validate and fix common user code issues
+     */
+    validateAndFixUserCode(userCode, questionData) {
+        let fixedCode = userCode;
+
+        // Fix common indentation issues for method bodies
+        if (questionData.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE) {
+            // Split into lines and fix indentation
+            const lines = fixedCode.split('\n');
+            const fixedLines = lines.map(line => {
+                const trimmedLine = line.trim();
+
+                // Skip empty lines
+                if (!trimmedLine) return line;
+
+                // Ensure proper indentation for method body content
+                // All content should be indented at least 8 spaces (2 levels)
+                if (trimmedLine && !line.startsWith('        ')) {
+                    return '        ' + trimmedLine;
+                }
+
+                return line;
+            });
+
+            fixedCode = fixedLines.join('\n');
+
+            // Validate brace matching
+            const openBraces = (fixedCode.match(/\{/g) || []).length;
+            const closeBraces = (fixedCode.match(/\}/g) || []).length;
+
+            console.log('Code validation:', {
+                originalLines: lines.length,
+                fixedLines: fixedLines.length,
+                openBraces: openBraces,
+                closeBraces: closeBraces,
+                braceBalance: openBraces - closeBraces
+            });
+        }
+
+        return fixedCode;
+    }
+
+    /**
      * Sleep utility
      */
     sleep(ms) {
@@ -403,14 +446,17 @@ class AssessmentJudge0 extends Judge0Integration {
                         templateString = questionData.template;
                     }
 
-                    const preparedCode = templateString.replace('{{USER_CODE}}', cleanUserCode);
+                    // Validate and fix common user code issues
+                    const validatedUserCode = this.validateAndFixUserCode(cleanUserCode, questionData);
+                    const preparedCode = templateString.replace('{{USER_CODE}}', validatedUserCode);
 
                     console.log('Template replacement:', {
                         templateType: Array.isArray(questionData.template) ? 'array' : 'string',
                         templateLength: templateString.length,
-                        userCode: cleanUserCode,
+                        originalUserCode: cleanUserCode,
+                        validatedUserCode: validatedUserCode,
                         preparedCodeLength: preparedCode.length,
-                        preparedCodePreview: preparedCode.substring(0, 300) + '...'
+                        preparedCodePreview: preparedCode.substring(0, 400) + '...'
                     });
 
                     return preparedCode;
