@@ -396,8 +396,7 @@
                 autoSave: true
             });
 
-            // Extend assessment engine with code execution
-            setupCodeExecution();
+            // Code execution is handled by AssessmentEngine
 
             // Load questions
             loadQuestionsAndStart();
@@ -406,77 +405,8 @@
             startTimer();
         }
 
-        /**
-         * Setup code execution functionality
-         */
-        function setupCodeExecution() {
-            // Override the executeCode method in assessment engine
-            const originalSetupQuestionHandlers = assessmentEngine.setupQuestionHandlers.bind(assessmentEngine);
-
-            assessmentEngine.setupQuestionHandlers = function(question) {
-                originalSetupQuestionHandlers(question);
-
-                // Add code execution handler
-                const executeBtn = assessmentEngine.container.querySelector('[data-execute-code]');
-                if (executeBtn) {
-                    executeBtn.addEventListener('click', () => {
-                        executeUserCode(question);
-                    });
-                }
-            };
-        }
-
-        /**
-         * Execute user code using Judge0
-         */
-        async function executeUserCode(question) {
-            const executeBtn = assessmentEngine.container.querySelector('[data-execute-code]');
-            const resultDiv = assessmentEngine.container.querySelector('[data-execution-result]');
-            const codeTextarea = assessmentEngine.container.querySelector('[data-question-input]');
-
-            if (!codeTextarea || !resultDiv) return;
-
-            const userCode = codeTextarea.value.trim();
-            if (!userCode) {
-                showExecutionResult(resultDiv, 'Please write some code before executing.', 'error');
-                return;
-            }
-
-            // Show loading state
-            executeBtn.disabled = true;
-            executeBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Executing...';
-            showExecutionResult(resultDiv, 'Compiling and executing your code...', 'pending');
-
-            try {
-                // Execute code using Judge0
-                const result = await judge0.executeAssessmentCode(question, userCode);
-
-                // Display result
-                if (result.success) {
-                    let message = `✅ Execution successful!\n\nOutput:\n${result.output || '(no output)'}`;
-
-                    if (result.testResults && result.testResults.length > 0) {
-                        message += `\n\n📊 Test Results:\n${result.feedback}`;
-                    }
-
-                    if (result.executionTime) {
-                        message += `\n\n⏱️ Execution time: ${result.executionTime}ms`;
-                    }
-
-                    showExecutionResult(resultDiv, message, 'success');
-                } else {
-                    showExecutionResult(resultDiv, `❌ ${result.feedback || result.error}`, 'error');
-                }
-
-            } catch (error) {
-                console.error('Code execution error:', error);
-                showExecutionResult(resultDiv, `❌ Execution failed: ${error.message}`, 'error');
-            } finally {
-                // Reset button
-                executeBtn.disabled = false;
-                executeBtn.innerHTML = '<i class="bi bi-play-fill me-1"></i> Run Code';
-            }
-        }
+        // Code execution is now handled entirely by AssessmentEngine
+        // No need for duplicate HTML functions
 
         /**
          * Show execution result
