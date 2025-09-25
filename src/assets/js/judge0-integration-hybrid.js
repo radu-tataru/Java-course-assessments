@@ -383,10 +383,27 @@ class AssessmentJudge0 extends Judge0Integration {
     }
 
     prepareExecutableCode(questionData, userCode) {
+        console.log('prepareExecutableCode called with:', {
+            questionType: questionData.type,
+            hasTemplate: !!questionData.template,
+            userCodeLength: userCode.length
+        });
+
         switch (questionData.type) {
             case CONFIG.QUESTION_TYPES.CODING_CHALLENGE:
                 if (questionData.template) {
-                    return questionData.template.replace('{{USER_CODE}}', userCode);
+                    // Clean the user code - remove any extra whitespace/newlines
+                    const cleanUserCode = userCode.trim();
+                    const preparedCode = questionData.template.replace('{{USER_CODE}}', cleanUserCode);
+
+                    console.log('Template replacement:', {
+                        originalTemplate: questionData.template.substring(0, 100) + '...',
+                        userCode: cleanUserCode,
+                        preparedCodeLength: preparedCode.length,
+                        preparedCodePreview: preparedCode.substring(0, 200) + '...'
+                    });
+
+                    return preparedCode;
                 }
                 return this.wrapCodeInClass(userCode);
 

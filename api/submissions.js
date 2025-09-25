@@ -37,6 +37,8 @@ export default async function handler(req, res) {
             }
 
             console.log('Submitting code to Judge0...');
+            console.log('Source code length:', source_code.length);
+            console.log('First 200 chars of source code:', source_code.substring(0, 200));
 
             const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
                 method: 'POST',
