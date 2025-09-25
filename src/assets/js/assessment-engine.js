@@ -105,7 +105,7 @@ class AssessmentEngine {
             <div class="question-card">
                 <div class="question-header">
                     <span class="question-number">Question ${this.currentQuestionIndex + 1}</span>
-                    <span class="question-type">${this.formatQuestionType(question.type)}</span>
+                    <span class="question-type">${this.formatQuestionType(question.type, question)}</span>
                 </div>
                 <div class="question-content">
                     <div class="question-text">${question.question}</div>
@@ -1024,7 +1024,7 @@ class AssessmentEngine {
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <span class="question-number">Question ${this.currentQuestionIndex + 1} of ${this.questions.length}</span>
-                            <span class="question-type">${this.formatQuestionType(question.type)}</span>
+                            <span class="question-type">${this.formatQuestionType(question.type, question)}</span>
                         </div>
                         <div class="question-status">
                             <i class="bi ${statusIcon}"></i>
@@ -1167,8 +1167,29 @@ class AssessmentEngine {
         }
     }
 
-    formatQuestionType(type) {
-        return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    formatQuestionType(type, question = null) {
+        // Handle multiple choice with more specific labeling
+        if (type === CONFIG.QUESTION_TYPES.MULTIPLE_CHOICE && question) {
+            if (question.multipleCorrect || Array.isArray(question.correctAnswer)) {
+                return 'Multiple Choice';
+            } else {
+                return 'Single Choice';
+            }
+        }
+
+        // Handle other question types
+        switch (type) {
+            case CONFIG.QUESTION_TYPES.CODE_READING:
+                return 'Code Reading';
+            case CONFIG.QUESTION_TYPES.CODE_COMPLETION:
+                return 'Code Completion';
+            case CONFIG.QUESTION_TYPES.CODING_CHALLENGE:
+                return 'Coding Challenge';
+            case CONFIG.QUESTION_TYPES.TRUE_FALSE:
+                return 'True/False';
+            default:
+                return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
     }
 
     formatDuration(milliseconds) {
