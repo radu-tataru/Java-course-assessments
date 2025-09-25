@@ -251,7 +251,8 @@ class AssessmentEngine {
                         </div>
                     </div>
                     <div class="code-editor-content">
-                        <textarea data-question-input rows="15" style="font-family: 'Courier New', monospace; font-size: 14px;">${completeTemplate}</textarea>
+                        <textarea data-question-input rows="15" style="font-family: 'Courier New', monospace; font-size: 14px; display: none;">${completeTemplate}</textarea>
+                        <div data-code-editor class="border rounded" style="min-height: 400px;"></div>
                     </div>
                 </div>
 
@@ -356,17 +357,68 @@ class AssessmentEngine {
                 this.executeCode(question);
             });
         }
+
+        // Setup CodeMirror for coding challenges
+        this.setupCodeEditor(question);
+    }
+
+    /**
+     * Setup CodeMirror editor for coding challenges
+     */
+    setupCodeEditor(question) {
+        if (question.type !== CONFIG.QUESTION_TYPES.CODING_CHALLENGE) return;
+
+        const editorContainer = this.container.querySelector('[data-code-editor]');
+        const textarea = this.container.querySelector('[data-question-input]');
+
+        if (!editorContainer || !textarea || !window.CodeMirror) return;
+
+        // Create CodeMirror instance
+        this.codeEditor = CodeMirror(editorContainer, {
+            value: textarea.value,
+            mode: 'text/x-java',
+            theme: 'default',
+            lineNumbers: true,
+            indentUnit: 4,
+            tabSize: 4,
+            lineWrapping: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+            styleActiveLine: true,
+            extraKeys: {
+                "Tab": "indentMore",
+                "Shift-Tab": "indentLess"
+            }
+        });
+
+        // Sync CodeMirror with textarea for form handling
+        this.codeEditor.on('change', () => {
+            textarea.value = this.codeEditor.getValue();
+            this.handleAnswerChange();
+        });
+
+        // Set editor height
+        this.codeEditor.setSize(null, 400);
     }
 
     /**
      * Execute code for coding challenges
      */
     async executeCode(question) {
-        const textarea = this.container.querySelector('[data-question-input]');
-        if (!textarea) return;
+        // Get code from CodeMirror or fallback to textarea
+        let codeContent = '';
+        if (this.codeEditor) {
+            codeContent = this.codeEditor.getValue();
+        } else {
+            const textarea = this.container.querySelector('[data-question-input]');
+            if (!textarea) return;
+            codeContent = textarea.value;
+        }
 
         // Extract only the user's code from the complete template
-        const userCode = this.extractUserCode(textarea.value.trim(), question);
+        const userCode = this.extractUserCode(codeContent.trim(), question);
         if (!userCode || userCode.includes('/* Write your code here */')) {
             this.showExecutionResult('Please write your code in the designated area.', false);
             return;
@@ -536,13 +588,22 @@ class AssessmentEngine {
 
             default:
                 // Handle text inputs and coding challenges
-                const textInput = this.container.querySelector('[data-question-input]');
-                if (textInput) {
+                let inputValue = '';
+                if (question.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE && this.codeEditor) {
+                    inputValue = this.codeEditor.getValue();
+                } else {
+                    const textInput = this.container.querySelector('[data-question-input]');
+                    if (textInput) {
+                        inputValue = textInput.value;
+                    }
+                }
+
+                if (inputValue) {
                     if (question.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE) {
                         // Extract only the user's code from the complete template
-                        answer = this.extractUserCode(textInput.value.trim(), question);
+                        answer = this.extractUserCode(inputValue.trim(), question);
                     } else {
-                        answer = textInput.value.trim();
+                        answer = inputValue.trim();
                     }
                 }
                 break;
