@@ -353,6 +353,8 @@
          */
         function clearProgress() {
             localStorage.removeItem(CONFIG.STORAGE_KEYS.CURRENT_ASSESSMENT);
+            // Clear timer data to ensure fresh start
+            clearTimerData();
             document.querySelector('.alert-warning').remove();
         }
 
