@@ -298,22 +298,270 @@ class TeacherDashboard {
         const stepFilter = document.getElementById('step-filter');
         const questionStepFilter = document.getElementById('question-step-filter');
 
+        // For general step filter, show all planned steps
         let html = '<option value="">All Steps</option>';
         for (let i = 1; i <= CONFIG.COURSE.TOTAL_STEPS; i++) {
             html += `<option value="${i}">Step ${i}</option>`;
         }
-
         if (stepFilter) stepFilter.innerHTML = html;
-        if (questionStepFilter) questionStepFilter.innerHTML = html;
+
+        // For question step filter, only show available steps
+        let questionHtml = '<option value="">All Steps</option>';
+        const availableSteps = [1]; // Currently only Step 1 has questions
+        availableSteps.forEach(step => {
+            questionHtml += `<option value="${step}">Step ${step}</option>`;
+        });
+        if (questionStepFilter) questionStepFilter.innerHTML = questionHtml;
 
         // Add event listeners for filtering
         if (stepFilter) {
             stepFilter.addEventListener('change', () => this.filterAssessments());
         }
 
+        if (questionStepFilter) {
+            questionStepFilter.addEventListener('change', () => this.filterQuestions());
+        }
+
         const statusFilter = document.getElementById('status-filter');
         if (statusFilter) {
             statusFilter.addEventListener('change', () => this.filterAssessments());
+        }
+    }
+
+    /**
+     * Load questions section
+     */
+    async loadQuestions() {
+        try {
+            await this.loadQuestionBank();
+            this.setupStepFilter(); // Ensure step filter is populated
+        } catch (error) {
+            console.error('Error loading questions section:', error);
+            this.showError('Failed to load questions');
+        }
+    }
+
+    /**
+     * Load and display all questions from question bank
+     */
+    async loadQuestionBank(filterStep = null) {
+        const tbody = document.getElementById('questions-table-body');
+        if (!tbody) return;
+
+        let allQuestions = [];
+
+        try {
+            // Define available question files (only load existing files)
+            const availableSteps = [1]; // Currently only Step 1 has questions
+
+            // Determine which steps to load
+            const stepsToLoad = filterStep ? [parseInt(filterStep)] : availableSteps;
+
+            // Load questions from specified steps
+            for (const step of stepsToLoad) {
+                // Only try to load if step is in available steps
+                if (!availableSteps.includes(step)) {
+                    continue;
+                }
+
+                try {
+                    const response = await fetch(`../../data/questions/step${step}-questions.json`);
+                    if (response.ok) {
+                        const stepData = await response.json();
+                        stepData.questions.forEach(question => {
+                            allQuestions.push({
+                                ...question,
+                                stepNumber: step,
+                                stepTitle: stepData.stepTitle || `Step ${step}`
+                            });
+                        });
+                    }
+                } catch (stepError) {
+                    console.warn(`Could not load questions for step ${step}:`, stepError);
+                }
+            }
+
+            this.displayQuestions(allQuestions);
+        } catch (error) {
+            console.error('Error loading question bank:', error);
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted p-4">Error loading questions</td></tr>';
+        }
+    }
+
+    /**
+     * Display questions in the table
+     */
+    displayQuestions(questions) {
+        const tbody = document.getElementById('questions-table-body');
+        if (!tbody) return;
+
+        if (questions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted p-4">No questions found</td></tr>';
+            return;
+        }
+
+        // Calculate success rates from submission data
+        const questionStats = this.calculateQuestionStats(questions);
+
+        let html = '';
+        questions.forEach(question => {
+            const stats = questionStats.get(question.id) || { attempts: 0, correct: 0, successRate: 0 };
+            const typeLabel = this.formatQuestionType(question.type);
+            const difficultyBadge = this.getDifficultyBadge(question.difficulty);
+
+            html += `
+                <tr>
+                    <td>
+                        <div class="fw-semibold" title="${question.question}">
+                            ${question.question.length > 80 ? question.question.substring(0, 80) + '...' : question.question}
+                        </div>
+                        <div class="small text-muted">${question.id}</div>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary">${typeLabel}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">Step ${question.stepNumber}</span>
+                    </td>
+                    <td>${difficultyBadge}</td>
+                    <td>
+                        <div>${stats.successRate}%</div>
+                        <div class="small text-muted">${stats.attempts} attempts</div>
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="dashboard.viewQuestion('${question.id}')" title="View Question">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="dashboard.editQuestion('${question.id}')" title="Edit Question">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    /**
+     * Calculate question statistics from submissions
+     */
+    calculateQuestionStats(questions) {
+        const stats = new Map();
+
+        questions.forEach(q => {
+            stats.set(q.id, { attempts: 0, correct: 0, successRate: 0 });
+        });
+
+        this.submissionData.forEach(submission => {
+            if (submission.answers) {
+                Object.entries(submission.answers).forEach(([questionId, answer]) => {
+                    const stat = stats.get(questionId);
+                    if (stat) {
+                        stat.attempts++;
+
+                        // Find the question to check if answer is correct
+                        const question = questions.find(q => q.id === questionId);
+                        if (question && this.isAnswerCorrect(question, answer)) {
+                            stat.correct++;
+                        }
+
+                        stat.successRate = stat.attempts > 0 ? Math.round((stat.correct / stat.attempts) * 100) : 0;
+                    }
+                });
+            }
+        });
+
+        return stats;
+    }
+
+    /**
+     * Check if an answer is correct for a question
+     */
+    isAnswerCorrect(question, answer) {
+        switch (question.type) {
+            case 'multiple_choice':
+            case 'true_false':
+                return answer === question.correctAnswer;
+            case 'code_reading':
+                return answer && answer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
+            case 'code_completion':
+            case 'coding_challenge':
+                // For code questions, we'd need to check compilation/execution results
+                // For now, just check if there's a submission
+                return answer && answer.trim().length > 0;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Get difficulty badge HTML
+     */
+    getDifficultyBadge(difficulty) {
+        const badgeClass = {
+            'beginner': 'bg-success',
+            'intermediate': 'bg-warning',
+            'advanced': 'bg-danger'
+        };
+
+        return `<span class="badge ${badgeClass[difficulty] || 'bg-secondary'}">${difficulty || 'Unknown'}</span>`;
+    }
+
+    /**
+     * View question details (placeholder)
+     */
+    viewQuestion(questionId) {
+        alert(`View question: ${questionId}\nThis functionality would open a detailed view of the question.`);
+    }
+
+    /**
+     * Edit question (placeholder)
+     */
+    editQuestion(questionId) {
+        alert(`Edit question: ${questionId}\nThis functionality would open an editor for the question.`);
+    }
+
+    /**
+     * Filter questions by step
+     */
+    async filterQuestions() {
+        const stepFilter = document.getElementById('question-step-filter');
+        if (!stepFilter) return;
+
+        const selectedStep = stepFilter.value;
+        await this.loadQuestionBank(selectedStep);
+    }
+
+    /**
+     * Format question type for display
+     */
+    formatQuestionType(type, question = null) {
+        // Handle multiple choice with more specific labeling
+        if (type === 'multiple_choice' && question) {
+            if (question.multipleCorrect || Array.isArray(question.correctAnswer)) {
+                return 'Multiple Choice';
+            } else {
+                return 'Single Choice';
+            }
+        }
+
+        // Handle other question types
+        switch (type) {
+            case 'code_reading':
+                return 'Code Reading';
+            case 'code_completion':
+                return 'Code Completion';
+            case 'coding_challenge':
+                return 'Coding Challenge';
+            case 'true_false':
+                return 'True/False';
+            case 'multiple_choice':
+                return 'Multiple Choice';
+            default:
+                return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
     }
 
