@@ -587,7 +587,9 @@ class AssessmentJudge0 extends Judge0Integration {
         console.log('prepareExecutableCode called with:', {
             questionType: questionData.type,
             hasTemplate: !!questionData.template,
-            userCodeLength: userCode.length
+            userCodeLength: userCode.length,
+            userCodePreview: userCode.substring(0, 100) + (userCode.length > 100 ? '...' : ''),
+            stackTrace: new Error().stack.split('\n').slice(1,4).map(line => line.trim())
         });
 
         switch (questionData.type) {
