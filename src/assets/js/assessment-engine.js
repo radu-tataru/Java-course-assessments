@@ -1129,7 +1129,24 @@ class AssessmentEngine {
         switch (question.type) {
             case CONFIG.QUESTION_TYPES.MULTIPLE_CHOICE:
                 if (Array.isArray(answer)) {
+                    // Debug for problematic questions
+                    if (question.id === 'step1-q1' || question.id === 'step1-q5' || question.id === 'step1-q6') {
+                        console.log(`DEBUG - ${question.id} ARRAY processing:`, {
+                            answer: answer,
+                            firstIndex: answer[0],
+                            textAtIndex: question.answers[answer[0]]?.text,
+                            allAnswers: question.answers
+                        });
+                    }
                     return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
+                }
+                // Debug for problematic questions
+                if (question.id === 'step1-q1' || question.id === 'step1-q5' || question.id === 'step1-q6') {
+                    console.log(`DEBUG - ${question.id} NUMBER processing:`, {
+                        answer: answer,
+                        textAtIndex: question.answers[answer]?.text,
+                        allAnswers: question.answers
+                    });
                 }
                 return question.answers[answer]?.text || `Option ${answer + 1}`;
 
@@ -1142,7 +1159,24 @@ class AssessmentEngine {
 
             case CONFIG.QUESTION_TYPES.CODE_READING:
                 if (Array.isArray(answer)) {
+                    // Debug for problematic questions
+                    if (question.id === 'step1-q6') {
+                        console.log(`DEBUG - ${question.id} CODE_READING ARRAY processing:`, {
+                            answer: answer,
+                            firstIndex: answer[0],
+                            textAtIndex: question.answers[answer[0]]?.text,
+                            allAnswers: question.answers
+                        });
+                    }
                     return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
+                }
+                // Debug for problematic questions
+                if (question.id === 'step1-q6') {
+                    console.log(`DEBUG - ${question.id} CODE_READING NUMBER processing:`, {
+                        answer: answer,
+                        textAtIndex: question.answers[answer]?.text,
+                        allAnswers: question.answers
+                    });
                 }
                 return question.answers[answer]?.text || answer;
 
