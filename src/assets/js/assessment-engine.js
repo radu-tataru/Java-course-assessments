@@ -198,30 +198,6 @@ class AssessmentEngine {
         return html;
     }
 
-    /**
-     * Generate Code Completion HTML
-     */
-    generateCodeCompletionHtml(question) {
-        const savedAnswer = this.userAnswers[this.currentQuestionIndex] || '';
-
-        return `
-            <div class="code-block">
-                <pre><code class="language-java">${question.incompleteCode}</code></pre>
-            </div>
-            <div class="form-group">
-                <label>Complete the missing code:</label>
-                <textarea class="form-control code-input" rows="3"
-                          placeholder="Write your code here..."
-                          data-question-input>${savedAnswer}</textarea>
-            </div>
-            <div class="mt-3">
-                <small class="text-muted">
-                    <i class="bi bi-info-circle"></i>
-                    ${question.hint || 'Focus on the specific functionality being tested.'}
-                </small>
-            </div>
-        `;
-    }
 
     /**
      * Generate Code Completion HTML (same interface as coding challenges)
@@ -251,13 +227,8 @@ class AssessmentEngine {
                         </div>
                     </div>
                     <div class="code-editor-content">
-                        <textarea
-                            data-question-input
-                            class="form-control"
-                            rows="20"
-                            style="font-family: 'Fira Code', 'JetBrains Mono', Consolas, monospace; font-size: 14px; line-height: 1.5;"
-                            placeholder="// Your implementation goes here"
-                        >${completeTemplate}</textarea>
+                        <textarea data-question-input rows="15" style="font-family: 'Courier New', monospace; font-size: 14px; display: none;">${completeTemplate}</textarea>
+                        <div data-code-editor class="border rounded" style="min-height: 400px;"></div>
                     </div>
 
                     <div class="execution-result" data-execution-result style="display: none;">
@@ -408,10 +379,11 @@ class AssessmentEngine {
     }
 
     /**
-     * Setup CodeMirror editor for coding challenges
+     * Setup CodeMirror editor for coding challenges and code completion questions
      */
     setupCodeEditor(question) {
-        if (question.type !== CONFIG.QUESTION_TYPES.CODING_CHALLENGE) return;
+        if (question.type !== CONFIG.QUESTION_TYPES.CODING_CHALLENGE &&
+            question.type !== CONFIG.QUESTION_TYPES.CODE_COMPLETION) return;
 
         const editorContainer = this.container.querySelector('[data-code-editor]');
         const textarea = this.container.querySelector('[data-question-input]');
