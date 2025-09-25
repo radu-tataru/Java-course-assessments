@@ -499,13 +499,19 @@ class AssessmentEngine {
         console.log('Debug - Question type:', question.type, 'Expected:', CONFIG.QUESTION_TYPES.CODE_COMPLETION);
         if (question.type === CONFIG.QUESTION_TYPES.CODE_COMPLETION) {
             console.log('Debug - This is a code completion question');
-            const lineBeforeUserCode = templateString.split('{{USER_CODE}}')[0].split('\n').pop().trim();
-            console.log('Debug - lineBeforeUserCode:', JSON.stringify(lineBeforeUserCode));
-            if (lineBeforeUserCode && lineBeforeUserCode.includes('//')) {
-                console.log('Debug - Found comment line, checking for specific keywords');
-                if (lineBeforeUserCode.includes('Complete') || lineBeforeUserCode.includes('Extract')) {
-                    // Template already has a specific instruction, just add minimal placeholder
-                    console.log('Debug - Using empty placeholder for code completion');
+            console.log('Debug - Template string:', templateString);
+
+            // Better approach: look for comment lines in the entire template before {{USER_CODE}}
+            const beforeUserCode = templateString.split('{{USER_CODE}}')[0];
+            const lines = beforeUserCode.split('\n');
+            console.log('Debug - Lines before USER_CODE:', lines);
+
+            // Check the last few lines for comments
+            for (let i = lines.length - 1; i >= Math.max(0, lines.length - 3); i--) {
+                const line = lines[i].trim();
+                console.log('Debug - Checking line:', JSON.stringify(line));
+                if (line.includes('//') && (line.includes('Complete') || line.includes('Extract'))) {
+                    console.log('Debug - Found specific comment, using empty placeholder');
                     return templateString.replace('{{USER_CODE}}', '');
                 }
             }
