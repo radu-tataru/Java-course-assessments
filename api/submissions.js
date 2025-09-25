@@ -61,27 +61,45 @@ export default async function handler(req, res) {
 
             console.log('Full submission payload:', JSON.stringify(submissionBody, null, 2));
 
-            // Try the direct Judge0 endpoint first as a test
-            console.log('Testing direct Judge0 endpoint...');
+            // First, let's check available languages
+            console.log('Checking available languages...');
             try {
-                const directResponse = await fetch('https://ce.judge0.com/submissions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(submissionBody)
-                });
-
-                if (directResponse.ok) {
-                    console.log('Direct Judge0 endpoint succeeded!');
-                    const directData = await directResponse.json();
-                    console.log('Direct response:', directData);
-                    return res.json(directData);
-                } else {
-                    console.log('Direct Judge0 failed:', directResponse.status, await directResponse.text());
+                const langResponse = await fetch('https://ce.judge0.com/languages');
+                if (langResponse.ok) {
+                    const languages = await langResponse.json();
+                    console.log('Available languages:', languages.filter(l => l.name.toLowerCase().includes('java')));
                 }
-            } catch (directError) {
-                console.log('Direct Judge0 error:', directError.message);
+            } catch (langError) {
+                console.log('Language check error:', langError.message);
+            }
+
+            // Try different Java language IDs
+            const javaLanguageIds = [62, 91, 10]; // Try multiple Java versions
+
+            for (const langId of javaLanguageIds) {
+                console.log(`Testing with Java language ID ${langId}...`);
+                const testBody = { ...submissionBody, language_id: langId };
+
+                try {
+                    const directResponse = await fetch('https://ce.judge0.com/submissions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(testBody)
+                    });
+
+                    if (directResponse.ok) {
+                        console.log(`Direct Judge0 endpoint succeeded with language ID ${langId}!`);
+                        const directData = await directResponse.json();
+                        console.log('Direct response:', directData);
+                        return res.json(directData);
+                    } else {
+                        console.log(`Direct Judge0 failed with language ID ${langId}:`, directResponse.status, await directResponse.text());
+                    }
+                } catch (directError) {
+                    console.log(`Direct Judge0 error with language ID ${langId}:`, directError.message);
+                }
             }
 
             // Fallback to RapidAPI
