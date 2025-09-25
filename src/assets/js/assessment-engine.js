@@ -489,8 +489,24 @@ class AssessmentEngine {
             templateString = question.template;
         }
 
-        // If user has existing code, show it, otherwise show simple placeholder
-        const codeContent = savedAnswer || `        // Your implementation goes here
+        // If user has existing code, show it
+        if (savedAnswer) {
+            return templateString.replace('{{USER_CODE}}', savedAnswer);
+        }
+
+        // For code completion, check if there's already a specific comment in the template
+        // If so, don't add a generic placeholder
+        if (question.type === CONFIG.QUESTION_TYPES.CODE_COMPLETION) {
+            const lineBeforeUserCode = templateString.split('{{USER_CODE}}')[0].split('\n').pop();
+            if (lineBeforeUserCode && lineBeforeUserCode.includes('//') &&
+                (lineBeforeUserCode.includes('Complete') || lineBeforeUserCode.includes('Extract'))) {
+                // Template already has a specific instruction, just add minimal placeholder
+                return templateString.replace('{{USER_CODE}}', '');
+            }
+        }
+
+        // Default placeholder for coding challenges or templates without specific instructions
+        const codeContent = `        // Your implementation goes here
         `;
 
         return templateString.replace('{{USER_CODE}}', codeContent);
