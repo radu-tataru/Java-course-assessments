@@ -589,7 +589,7 @@ class AssessmentJudge0 extends Judge0Integration {
             hasTemplate: !!questionData.template,
             userCodeLength: userCode.length,
             userCodePreview: userCode.substring(0, 100) + (userCode.length > 100 ? '...' : ''),
-            stackTrace: new Error().stack.split('\n').slice(1,4).map(line => line.trim())
+            stackTrace: new Error().stack.split('\n').slice(1,6).map(line => line.trim())
         });
 
         switch (questionData.type) {
