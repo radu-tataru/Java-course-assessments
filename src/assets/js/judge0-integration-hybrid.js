@@ -692,7 +692,15 @@ public class ${className} {
         testResults.forEach((test, index) => {
             const status = test.passed ? '✅' : '❌';
             feedback += `Test ${index + 1} ${status}\n`;
-            feedback += `Input: ${test.input}\n`;
+
+            // Format input to convert \n literals to actual line breaks for better readability
+            const formatInput = (input) => {
+                if (!input) return input;
+                // Replace literal \n with actual line breaks and improve CSV formatting
+                return input.replace(/\\n/g, '\n').replace(/"/g, '');
+            };
+
+            feedback += `Input: ${formatInput(test.input)}\n`;
             feedback += `Expected: ${test.expectedOutput}\n`;
             feedback += `Got: ${test.actualOutput}\n\n`;
         });
