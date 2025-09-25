@@ -1,4 +1,7 @@
 {
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "installCommand": "npm install",
   "functions": {
     "api/submissions.js": {
       "maxDuration": 30
