@@ -61,6 +61,31 @@ export default async function handler(req, res) {
 
             console.log('Full submission payload:', JSON.stringify(submissionBody, null, 2));
 
+            // Try the direct Judge0 endpoint first as a test
+            console.log('Testing direct Judge0 endpoint...');
+            try {
+                const directResponse = await fetch('https://ce.judge0.com/submissions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(submissionBody)
+                });
+
+                if (directResponse.ok) {
+                    console.log('Direct Judge0 endpoint succeeded!');
+                    const directData = await directResponse.json();
+                    console.log('Direct response:', directData);
+                    return res.json(directData);
+                } else {
+                    console.log('Direct Judge0 failed:', directResponse.status, await directResponse.text());
+                }
+            } catch (directError) {
+                console.log('Direct Judge0 error:', directError.message);
+            }
+
+            // Fallback to RapidAPI
+            console.log('Trying RapidAPI endpoint...');
             const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
                 method: 'POST',
                 headers: {
