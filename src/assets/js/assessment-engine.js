@@ -1107,6 +1107,18 @@ class AssessmentEngine {
      * Format answer for review display
      */
     formatAnswerForReview(question, answer) {
+        // Debug logging for Question 1 to see what's happening
+        if (question.id === 'step1-q1') {
+            console.log('DEBUG - Question 1 formatAnswerForReview:', {
+                questionId: question.id,
+                questionType: question.type,
+                answer: answer,
+                answerType: typeof answer,
+                answers: question.answers,
+                expectedText: question.answers[answer]?.text
+            });
+        }
+
         if (!answer && answer !== 0) return '<em class="text-muted">No answer provided</em>';
 
         switch (question.type) {
