@@ -229,7 +229,7 @@ body {
     font-size: 0.8rem;
     color: var(--secondary-color);
     display: flex;
-    justify-content: between;
+    justify-content: space-between;
     align-items: center;
 }
 
