@@ -313,14 +313,6 @@ class AssessmentEngine {
                     </label>
                 </li>
             </ul>
-            ${question.explanation ? `
-                <div class="mt-3">
-                    <small class="text-muted">
-                        <i class="bi bi-lightbulb"></i>
-                        ${question.explanation}
-                    </small>
-                </div>
-            ` : ''}
         `;
     }
 
