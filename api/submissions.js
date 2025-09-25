@@ -73,8 +73,34 @@ export default async function handler(req, res) {
                 console.log('Language check error:', langError.message);
             }
 
-            // Try different Java language IDs
-            const javaLanguageIds = [62, 91, 10]; // Try multiple Java versions
+            // If language_id is not Java (62), respect the original language
+            if (submissionBody.language_id !== 62) {
+                console.log(`Using specified language ID ${submissionBody.language_id}...`);
+
+                try {
+                    const directResponse = await fetch('https://ce.judge0.com/submissions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(submissionBody)
+                    });
+
+                    if (directResponse.ok) {
+                        console.log(`Direct Judge0 endpoint succeeded with language ID ${submissionBody.language_id}!`);
+                        const directData = await directResponse.json();
+                        console.log('Direct response:', directData);
+                        return res.json(directData);
+                    } else {
+                        console.log(`Direct Judge0 failed with language ID ${submissionBody.language_id}:`, directResponse.status, await directResponse.text());
+                    }
+                } catch (directError) {
+                    console.log(`Direct Judge0 error with language ID ${submissionBody.language_id}:`, directError.message);
+                }
+            }
+
+            // Try different Java language IDs only for Java code
+            const javaLanguageIds = [62, 91, 10];
 
             for (const langId of javaLanguageIds) {
                 console.log(`Testing with Java language ID ${langId}...`);
