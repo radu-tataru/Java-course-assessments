@@ -1090,7 +1090,18 @@ class AssessmentEngine {
      * Format answer for review display
      */
     formatAnswerForReview(question, answer) {
-        if (!answer) return '<em class="text-muted">No answer provided</em>';
+        // Debug logging to see what answer data we receive
+        if (question.type === CONFIG.QUESTION_TYPES.CODE_READING) {
+            console.log('DEBUG - Code Reading Answer:', {
+                questionId: question.id,
+                answer: answer,
+                answerType: typeof answer,
+                isArray: Array.isArray(answer),
+                answerLength: answer?.length
+            });
+        }
+
+        if (!answer && answer !== 0) return '<em class="text-muted">No answer provided</em>';
 
         switch (question.type) {
             case CONFIG.QUESTION_TYPES.MULTIPLE_CHOICE:
