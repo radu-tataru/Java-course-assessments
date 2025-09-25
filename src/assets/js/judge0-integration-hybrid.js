@@ -331,22 +331,29 @@ class Judge0Integration {
 
         // Fix common indentation issues for method bodies
         if (questionData.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE) {
+            // First, normalize all line endings and remove extra whitespace
+            fixedCode = fixedCode.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
             // Split into lines and fix indentation
             const lines = fixedCode.split('\n');
-            const fixedLines = lines.map(line => {
+            const fixedLines = lines.map((line, index) => {
                 const trimmedLine = line.trim();
 
                 // Skip empty lines
-                if (!trimmedLine) return line;
+                if (!trimmedLine) return '';
 
                 // Ensure proper indentation for method body content
                 // All content should be indented at least 8 spaces (2 levels)
-                if (trimmedLine && !line.startsWith('        ')) {
-                    return '        ' + trimmedLine;
-                }
-
-                return line;
+                return '        ' + trimmedLine;
             });
+
+            // Remove empty lines at start and end
+            while (fixedLines.length > 0 && fixedLines[0] === '') {
+                fixedLines.shift();
+            }
+            while (fixedLines.length > 0 && fixedLines[fixedLines.length - 1] === '') {
+                fixedLines.pop();
+            }
 
             fixedCode = fixedLines.join('\n');
 
@@ -359,7 +366,8 @@ class Judge0Integration {
                 fixedLines: fixedLines.length,
                 openBraces: openBraces,
                 closeBraces: closeBraces,
-                braceBalance: openBraces - closeBraces
+                braceBalance: openBraces - closeBraces,
+                fixedCodePreview: fixedCode.substring(0, 200) + '...'
             });
         }
 
