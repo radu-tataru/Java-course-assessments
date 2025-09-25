@@ -457,12 +457,12 @@ class AssessmentJudge0 extends Judge0Integration {
                     // For debugging: create a minimal working Java program
                     if (cleanUserCode.trim() === 'return 2;') {
                         const testCode = `
-public class Solution {
+public class Main {
     public static void main(String[] args) {
         System.out.println("Hello World");
     }
 }`.trim();
-                        console.log('Using debug test code:', testCode);
+                        console.log('Using debug test code with Main class:', testCode);
                         return testCode;
                     }
 

@@ -41,6 +41,26 @@ export default async function handler(req, res) {
             console.log('First 200 chars of source code:', source_code.substring(0, 200));
             console.log('Full source code for debugging:', source_code);
 
+            // Check for invisible characters
+            const encoded = Buffer.from(source_code).toString('base64');
+            console.log('Base64 encoded:', encoded);
+            console.log('Base64 decoded back:', Buffer.from(encoded, 'base64').toString());
+
+            // Check if decoding matches original
+            const backDecoded = Buffer.from(encoded, 'base64').toString();
+            console.log('Round trip successful:', backDecoded === source_code);
+
+            const submissionBody = {
+                source_code: encoded,
+                language_id: language_id || 62, // Java
+                stdin: Buffer.from(stdin || '').toString('base64'),
+                cpu_time_limit: 10,
+                memory_limit: 128000,
+                wall_time_limit: 15
+            };
+
+            console.log('Full submission payload:', JSON.stringify(submissionBody, null, 2));
+
             const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
                 method: 'POST',
                 headers: {
@@ -48,14 +68,7 @@ export default async function handler(req, res) {
                     'X-RapidAPI-Key': apiKey,
                     'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
                 },
-                body: JSON.stringify({
-                    source_code: Buffer.from(source_code).toString('base64'),
-                    language_id: language_id || 62, // Java
-                    stdin: Buffer.from(stdin || '').toString('base64'),
-                    cpu_time_limit: 10,
-                    memory_limit: 128000,
-                    wall_time_limit: 15
-                })
+                body: JSON.stringify(submissionBody)
             });
 
             if (!response.ok) {
