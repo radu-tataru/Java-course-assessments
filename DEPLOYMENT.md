@@ -83,16 +83,25 @@ git subtree push --prefix backend heroku main
 npm i -g vercel
 ```
 
-2. **Deploy Backend:**
+2. **Deploy from Project Root:**
 ```bash
-cd backend
 vercel
-# Follow prompts, add JUDGE0_API_KEY as environment variable
+# Follow prompts
 ```
 
-3. **Update Frontend:**
-   - Update `getBackendUrl()` in `judge0-integration-hybrid.js`
-   - Replace with your Vercel URL
+3. **Set Environment Variable:**
+```bash
+vercel env add JUDGE0_API_KEY
+# Enter your Judge0 API key when prompted
+```
+
+4. **Redeploy:**
+```bash
+vercel --prod
+```
+
+**Your site will be available at**: `https://your-app-name.vercel.app`
+**Features**: Full functionality with secure API key storage
 
 ### D. Railway/Render.com
 

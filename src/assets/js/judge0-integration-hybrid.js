@@ -42,9 +42,14 @@ class Judge0Integration {
             return 'http://localhost:3000';
         }
 
-        // For GitHub Pages - would need to deploy backend separately
-        // This could be Heroku, Vercel, etc.
-        return 'https://your-backend-url.herokuapp.com';
+        // For Vercel deployment - use current domain
+        if (window.location.hostname.includes('vercel.app')) {
+            return window.location.origin;
+        }
+
+        // For GitHub Pages or other deployments with Vercel backend
+        // Update this with your actual Vercel URL
+        return 'https://your-app-name.vercel.app';
     }
 
     /**
@@ -122,7 +127,7 @@ class Judge0Integration {
     async getResultViaBackend(token, maxAttempts = 10, interval = 1000) {
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             try {
-                const response = await fetch(`${this.backendUrl}/api/judge0/submissions/${token}`);
+                const response = await fetch(`${this.backendUrl}/api/judge0/submissions?token=${token}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to get result from backend');
