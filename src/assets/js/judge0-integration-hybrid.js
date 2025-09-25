@@ -693,17 +693,19 @@ public class ${className} {
             const status = test.passed ? '✅' : '❌';
             feedback += `Test ${index + 1} ${status}\n`;
 
-            // Format input to display CSV content like code blocks
+            // Format input to display CSV content as indented code
             const formatInput = (input) => {
                 if (!input) return input;
 
                 // Check if this looks like CSV test data
                 if (input.includes('contains:') && input.includes('\\n')) {
-                    // Extract the CSV content and format it as code
+                    // Extract the CSV content and format it as indented code
                     const csvMatch = input.match(/contains:\s*"([^"]+)"/);
                     if (csvMatch) {
                         const csvContent = csvMatch[1].replace(/\\n/g, '\n');
-                        return input.replace(csvMatch[0], `contains:\n\`\`\`\n${csvContent}\n\`\`\``);
+                        // Indent each line to make it look like code
+                        const indentedContent = csvContent.split('\n').map(line => `    ${line}`).join('\n');
+                        return input.replace(csvMatch[0], `contains:\n\n${indentedContent}\n`);
                     }
                 }
 
