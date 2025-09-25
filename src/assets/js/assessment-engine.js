@@ -496,22 +496,16 @@ class AssessmentEngine {
 
         // For code completion, check if there's already a specific comment in the template
         // If so, don't add a generic placeholder
-        console.log('Debug - Question type:', question.type, 'Expected:', CONFIG.QUESTION_TYPES.CODE_COMPLETION);
         if (question.type === CONFIG.QUESTION_TYPES.CODE_COMPLETION) {
-            console.log('Debug - This is a code completion question');
-            console.log('Debug - Template string:', templateString);
-
-            // Better approach: look for comment lines in the entire template before {{USER_CODE}}
+            // Look for comment lines in the template before {{USER_CODE}}
             const beforeUserCode = templateString.split('{{USER_CODE}}')[0];
             const lines = beforeUserCode.split('\n');
-            console.log('Debug - Lines before USER_CODE:', lines);
 
-            // Check the last few lines for comments
+            // Check the last few lines for specific instruction comments
             for (let i = lines.length - 1; i >= Math.max(0, lines.length - 3); i--) {
                 const line = lines[i].trim();
-                console.log('Debug - Checking line:', JSON.stringify(line));
                 if (line.includes('//') && (line.includes('Complete') || line.includes('Extract'))) {
-                    console.log('Debug - Found specific comment, using empty placeholder');
+                    // Template already has a specific instruction, use empty placeholder
                     return templateString.replace('{{USER_CODE}}', '');
                 }
             }
