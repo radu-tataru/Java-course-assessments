@@ -224,6 +224,51 @@ class AssessmentEngine {
     }
 
     /**
+     * Generate Code Completion HTML (same interface as coding challenges)
+     */
+    generateCodeCompletionHtml(question) {
+        const savedAnswer = this.userAnswers[this.currentQuestionIndex] || '';
+
+        // Generate the complete template with placeholder for better UX
+        const completeTemplate = this.generateCompleteTemplate(question, savedAnswer);
+
+        return `
+            <div class="coding-challenge">
+                <div class="challenge-requirements">
+                    <h5>Requirements:</h5>
+                    <div class="requirements-list">
+                        ${question.requirements.map(req => `<div class="requirement-item">${req}</div>`).join('')}
+                    </div>
+                </div>
+
+                <div class="code-editor mt-4">
+                    <div class="code-editor-header">
+                        <span>Complete the missing code:</span>
+                        <div>
+                            <button class="btn-execute" data-execute-code>
+                                <i class="bi bi-play-fill"></i> Run Code
+                            </button>
+                        </div>
+                    </div>
+                    <div class="code-editor-content">
+                        <textarea
+                            data-question-input
+                            class="form-control"
+                            rows="20"
+                            style="font-family: 'Fira Code', 'JetBrains Mono', Consolas, monospace; font-size: 14px; line-height: 1.5;"
+                            placeholder="// Your implementation goes here"
+                        >${completeTemplate}</textarea>
+                    </div>
+
+                    <div class="execution-result" data-execution-result style="display: none;">
+                        <!-- Execution results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
      * Generate Coding Challenge HTML
      */
     generateCodingChallengeHtml(question) {

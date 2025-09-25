@@ -49,9 +49,29 @@
       "id": "step1-q4",
       "type": "code_completion",
       "question": "Complete the missing code to read all lines from a file and return them as a List<String>:",
-      "incompleteCode": "public List<String> readAllLines(String filePath) throws IOException {\n    List<String> lines = new ArrayList<>();\n    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {\n        String line;\n        /* TODO: Complete the while loop to read all lines */\n    }\n    return lines;\n}",
+      "requirements": [
+        "📝 WHAT TO WRITE: Complete the missing while loop code",
+        "❌ DON'T WRITE: class definitions, import statements, or method signatures",
+        "✅ DO WRITE: The while loop condition and body to read all lines",
+        "💡 HINT: Use readLine() in a while loop condition and add each line to the list"
+      ],
+      "template": [
+        "import java.io.*;",
+        "import java.util.*;",
+        "",
+        "public class Main {",
+        "    public List<String> readAllLines(String filePath) throws IOException {",
+        "        List<String> lines = new ArrayList<>();",
+        "        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {",
+        "            String line;",
+        "            // Complete the while loop to read all lines",
+        "            {{USER_CODE}}",
+        "        }",
+        "        return lines;",
+        "    }",
+        "}"
+      ],
       "correctAnswer": "while ((line = reader.readLine()) != null) {\n    lines.add(line);\n}",
-      "hint": "Use readLine() in a while loop condition and add each line to the list",
       "difficulty": "intermediate",
       "points": 15
     },
@@ -154,9 +174,28 @@
       "id": "step1-q9",
       "type": "code_completion",
       "question": "Complete the code to extract the 'name' field from each JSON object in an array:",
-      "incompleteCode": "String jsonString = \"[{\\\"name\\\":\\\"John\\\", \\\"age\\\":25}, {\\\"name\\\":\\\"Jane\\\", \\\"age\\\":30}]\";\nJSONArray jsonArray = new JSONArray(jsonString);\nfor (int i = 0; i < jsonArray.length(); i++) {\n    JSONObject obj = jsonArray.getJSONObject(i);\n    /* TODO: Extract and print the name */\n}",
+      "requirements": [
+        "📝 WHAT TO WRITE: Code to extract and print the name field",
+        "❌ DON'T WRITE: class definitions, import statements, or method signatures",
+        "✅ DO WRITE: Variable declaration and print statement for the name field",
+        "💡 HINT: Use getString() method to extract the 'name' field from the JSONObject"
+      ],
+      "template": [
+        "import org.json.*;",
+        "",
+        "public class Main {",
+        "    public static void main(String[] args) {",
+        "        String jsonString = \"[{\\\"name\\\":\\\"John\\\", \\\"age\\\":25}, {\\\"name\\\":\\\"Jane\\\", \\\"age\\\":30}]\";",
+        "        JSONArray jsonArray = new JSONArray(jsonString);",
+        "        for (int i = 0; i < jsonArray.length(); i++) {",
+        "            JSONObject obj = jsonArray.getJSONObject(i);",
+        "            // Extract and print the name",
+        "            {{USER_CODE}}",
+        "        }",
+        "    }",
+        "}"
+      ],
       "correctAnswer": "String name = obj.getString(\"name\");\nSystem.out.println(name);",
-      "hint": "Use getString() method to extract the 'name' field from the JSONObject",
       "difficulty": "intermediate",
       "points": 15
     },
