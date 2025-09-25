@@ -94,7 +94,7 @@ class Judge0Integration {
     async executeViaBackend(sourceCode, input) {
         try {
             // Submit code via backend
-            const submitResponse = await fetch(`${this.backendUrl}/api/judge0/submissions`, {
+            const submitResponse = await fetch(`${this.backendUrl}/api/submissions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -127,7 +127,7 @@ class Judge0Integration {
     async getResultViaBackend(token, maxAttempts = 10, interval = 1000) {
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             try {
-                const response = await fetch(`${this.backendUrl}/api/judge0/submissions?token=${token}`);
+                const response = await fetch(`${this.backendUrl}/api/submissions?token=${token}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to get result from backend');

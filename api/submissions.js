@@ -20,7 +20,8 @@ export default async function handler(req, res) {
 
     if (!apiKey) {
         return res.status(500).json({
-            error: 'Judge0 API key not configured'
+            error: 'Judge0 API key not configured. Please set JUDGE0_API_KEY environment variable.',
+            configured: false
         });
     }
 
@@ -28,6 +29,14 @@ export default async function handler(req, res) {
         if (req.method === 'POST') {
             // Submit code for execution
             const { source_code, language_id, stdin } = req.body;
+
+            if (!source_code) {
+                return res.status(400).json({
+                    error: 'source_code is required'
+                });
+            }
+
+            console.log('Submitting code to Judge0...');
 
             const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
                 method: 'POST',
@@ -38,7 +47,7 @@ export default async function handler(req, res) {
                 },
                 body: JSON.stringify({
                     source_code: Buffer.from(source_code).toString('base64'),
-                    language_id,
+                    language_id: language_id || 62, // Java
                     stdin: Buffer.from(stdin || '').toString('base64'),
                     cpu_time_limit: 10,
                     memory_limit: 128000,
@@ -46,7 +55,17 @@ export default async function handler(req, res) {
                 })
             });
 
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Judge0 submission error:', response.status, errorText);
+                return res.status(response.status).json({
+                    error: 'Judge0 API error',
+                    details: errorText
+                });
+            }
+
             const data = await response.json();
+            console.log('Code submitted, token:', data.token);
             return res.json(data);
 
         } else if (req.method === 'GET') {
@@ -55,9 +74,11 @@ export default async function handler(req, res) {
 
             if (!token) {
                 return res.status(400).json({
-                    error: 'Token parameter required'
+                    error: 'Token parameter is required'
                 });
             }
+
+            console.log('Getting result for token:', token);
 
             const response = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
                 headers: {
@@ -66,18 +87,29 @@ export default async function handler(req, res) {
                 }
             });
 
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Judge0 result error:', response.status, errorText);
+                return res.status(response.status).json({
+                    error: 'Judge0 API error',
+                    details: errorText
+                });
+            }
+
             const data = await response.json();
+            console.log('Result retrieved, status:', data.status?.description || 'unknown');
             return res.json(data);
         }
 
         return res.status(405).json({
-            error: 'Method not allowed'
+            error: 'Method not allowed. Use POST to submit code or GET with token to retrieve results.'
         });
 
     } catch (error) {
-        console.error('Judge0 API error:', error);
+        console.error('Serverless function error:', error);
         return res.status(500).json({
-            error: 'Internal server error'
+            error: 'Internal server error',
+            message: error.message
         });
     }
 }
