@@ -229,6 +229,9 @@ class AssessmentEngine {
     generateCodingChallengeHtml(question) {
         const savedAnswer = this.userAnswers[this.currentQuestionIndex] || '';
 
+        // Generate the complete template with placeholder for better UX
+        const completeTemplate = this.generateCompleteTemplate(question, savedAnswer);
+
         return `
             <div class="coding-challenge">
                 <div class="challenge-requirements">
@@ -240,7 +243,7 @@ class AssessmentEngine {
 
                 <div class="code-editor mt-4">
                     <div class="code-editor-header">
-                        <span>Write your Java code:</span>
+                        <span>Complete the method implementation:</span>
                         <div>
                             <button class="btn-execute" data-execute-code>
                                 <i class="bi bi-play-fill"></i> Run Code
@@ -248,7 +251,7 @@ class AssessmentEngine {
                         </div>
                     </div>
                     <div class="code-editor-content">
-                        <textarea data-question-input placeholder="// Write only the method body content here\\n// Example for proper indentation:\\n        int count = 0;\\n        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {\\n            String line;\\n            while ((line = reader.readLine()) != null) {\\n                // your logic here\\n            }\\n        }\\n        return count;">${savedAnswer}</textarea>
+                        <textarea data-question-input rows="15" style="font-family: 'Courier New', monospace; font-size: 14px;">${completeTemplate}</textarea>
                     </div>
                 </div>
 
@@ -260,9 +263,9 @@ class AssessmentEngine {
                     <div class="test-case-list">
                         ${question.testCases.map((testCase, index) => `
                             <div class="alert alert-info">
-                                <strong>Test ${index + 1}:</strong>
-                                Input: <code>${testCase.input}</code> →
-                                Expected: <code>${testCase.expected}</code>
+                                <strong>Test ${index + 1}:</strong> ${testCase.description || ''}
+                                <br><strong>Input:</strong> <span class="text-muted">${this.formatTestInput(testCase.input)}</span>
+                                <br><strong>Expected Output:</strong> <code class="text-success">${testCase.expected}</code>
                             </div>
                         `).join('')}
                     </div>
@@ -362,9 +365,10 @@ class AssessmentEngine {
         const textarea = this.container.querySelector('[data-question-input]');
         if (!textarea) return;
 
-        const userCode = textarea.value.trim();
-        if (!userCode) {
-            this.showExecutionResult('Please enter some code to execute.', false);
+        // Extract only the user's code from the complete template
+        const userCode = this.extractUserCode(textarea.value.trim(), question);
+        if (!userCode || userCode.includes('/* Write your code here */')) {
+            this.showExecutionResult('Please write your code in the designated area.', false);
             return;
         }
 
@@ -392,6 +396,92 @@ class AssessmentEngine {
             executeBtn.innerHTML = originalBtnText;
             executeBtn.disabled = false;
         }
+    }
+
+    /**
+     * Generate complete template showing full code structure
+     */
+    generateCompleteTemplate(question, savedAnswer) {
+        if (!question.template) {
+            return savedAnswer || '/* Write your code here */';
+        }
+
+        // Handle both array and string templates
+        let templateString;
+        if (Array.isArray(question.template)) {
+            templateString = question.template.join('\n');
+        } else {
+            templateString = question.template;
+        }
+
+        // If user has existing code, show it, otherwise show placeholder
+        const codeContent = savedAnswer || '        /* Write your code here */';
+
+        return templateString.replace('{{USER_CODE}}', codeContent);
+    }
+
+    /**
+     * Extract only the user's code from the complete template
+     */
+    extractUserCode(fullTemplate, question) {
+        if (!question.template) {
+            return fullTemplate;
+        }
+
+        // Handle both array and string templates
+        let templateString;
+        if (Array.isArray(question.template)) {
+            templateString = question.template.join('\n');
+        } else {
+            templateString = question.template;
+        }
+
+        // Find the {{USER_CODE}} position in the template
+        const userCodeIndex = templateString.indexOf('{{USER_CODE}}');
+        if (userCodeIndex === -1) {
+            return fullTemplate;
+        }
+
+        // Calculate the lines before and after the user code
+        const beforeLines = templateString.substring(0, userCodeIndex).split('\n');
+        const afterLines = templateString.substring(userCodeIndex + '{{USER_CODE}}'.length).split('\n');
+
+        // Extract the user code from the full template
+        const fullLines = fullTemplate.split('\n');
+        const userStartLine = beforeLines.length - 1;
+        const userEndLine = fullLines.length - afterLines.length;
+
+        if (userStartLine >= 0 && userEndLine > userStartLine) {
+            const userLines = fullLines.slice(userStartLine, userEndLine);
+            // Remove leading whitespace but preserve relative indentation
+            return userLines.map(line => line.replace(/^        /, '')).join('\n').trim();
+        }
+
+        return fullTemplate;
+    }
+
+    /**
+     * Format test input for better readability
+     */
+    formatTestInput(input) {
+        if (!input) return 'No input';
+
+        // Handle file content descriptions
+        if (input.includes('contains:')) {
+            const parts = input.split('contains:');
+            if (parts.length === 2) {
+                const fileName = parts[0].trim();
+                let content = parts[1].trim().replace(/^"|"$/g, ''); // Remove quotes
+
+                // Format newline characters for display
+                content = content.replace(/\\n/g, '\n');
+
+                return `File "${fileName}" with content:<br><pre class="mt-2 p-2 bg-light border rounded" style="font-size: 12px; max-height: 100px; overflow-y: auto;">${content}</pre>`;
+            }
+        }
+
+        // For simple inputs, just return as is
+        return `<code>${input}</code>`;
     }
 
     /**
@@ -445,10 +535,15 @@ class AssessmentEngine {
                 break;
 
             default:
-                // Handle text inputs
+                // Handle text inputs and coding challenges
                 const textInput = this.container.querySelector('[data-question-input]');
                 if (textInput) {
-                    answer = textInput.value.trim();
+                    if (question.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE) {
+                        // Extract only the user's code from the complete template
+                        answer = this.extractUserCode(textInput.value.trim(), question);
+                    } else {
+                        answer = textInput.value.trim();
+                    }
                 }
                 break;
         }
