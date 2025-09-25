@@ -60,8 +60,31 @@ class AssessmentEngine {
             // Shuffle answers for each question if option is enabled
             if (this.options.shuffleAnswers) {
                 this.questions.forEach(question => {
-                    if (question.type === CONFIG.QUESTION_TYPES.MULTIPLE_CHOICE && question.answers) {
-                        this.shuffleArray(question.answers);
+                    if ((question.type === CONFIG.QUESTION_TYPES.MULTIPLE_CHOICE ||
+                         question.type === CONFIG.QUESTION_TYPES.CODE_READING) && question.answers) {
+                        // Create mapping array to track original indices
+                        const originalIndices = question.answers.map((_, index) => index);
+
+                        // Create combined array of [answer, originalIndex] pairs
+                        const combined = question.answers.map((answer, index) => ({ answer, originalIndex: index }));
+
+                        // Shuffle the combined array
+                        this.shuffleArray(combined);
+
+                        // Extract shuffled answers and create new index mapping
+                        question.answers = combined.map(item => item.answer);
+                        const indexMapping = combined.map(item => item.originalIndex);
+
+                        // Update correctAnswer index(es) to match the new positions
+                        if (Array.isArray(question.correctAnswer)) {
+                            // Multiple correct answers - update each index
+                            question.correctAnswer = question.correctAnswer.map(oldIndex =>
+                                indexMapping.indexOf(oldIndex)
+                            );
+                        } else {
+                            // Single correct answer - find new position
+                            question.correctAnswer = indexMapping.indexOf(question.correctAnswer);
+                        }
                     }
                 });
             }
@@ -1107,46 +1130,13 @@ class AssessmentEngine {
      * Format answer for review display
      */
     formatAnswerForReview(question, answer) {
-        // Debug logging for Questions 1, 5, and 6 to see what's happening
-        if (question.id === 'step1-q1' || question.id === 'step1-q5' || question.id === 'step1-q6') {
-            console.log(`DEBUG - ${question.id} formatAnswerForReview:`, {
-                questionId: question.id,
-                questionType: question.type,
-                answer: answer,
-                answerType: typeof answer,
-                isArray: Array.isArray(answer),
-                arrayContent: Array.isArray(answer) ? answer : null,
-                answers: question.answers.map((a, i) => `${i}: ${a.text}`),
-                expectedText: Array.isArray(answer) ?
-                    answer.map(idx => question.answers[idx]?.text).join(', ') :
-                    question.answers[answer]?.text,
-                result: 'ABOUT TO RETURN'
-            });
-        }
 
         if (!answer && answer !== 0) return '<em class="text-muted">No answer provided</em>';
 
         switch (question.type) {
             case CONFIG.QUESTION_TYPES.MULTIPLE_CHOICE:
                 if (Array.isArray(answer)) {
-                    // Debug for problematic questions
-                    if (question.id === 'step1-q1' || question.id === 'step1-q5' || question.id === 'step1-q6') {
-                        console.log(`DEBUG - ${question.id} ARRAY processing:`, {
-                            answer: answer,
-                            firstIndex: answer[0],
-                            textAtIndex: question.answers[answer[0]]?.text,
-                            allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
-                        });
-                    }
                     return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
-                }
-                // Debug for problematic questions
-                if (question.id === 'step1-q1' || question.id === 'step1-q5' || question.id === 'step1-q6') {
-                    console.log(`DEBUG - ${question.id} NUMBER processing:`, {
-                        answer: answer,
-                        textAtIndex: question.answers[answer]?.text,
-                        allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
-                    });
                 }
                 return question.answers[answer]?.text || `Option ${answer + 1}`;
 
@@ -1159,24 +1149,7 @@ class AssessmentEngine {
 
             case CONFIG.QUESTION_TYPES.CODE_READING:
                 if (Array.isArray(answer)) {
-                    // Debug for problematic questions
-                    if (question.id === 'step1-q6') {
-                        console.log(`DEBUG - ${question.id} CODE_READING ARRAY processing:`, {
-                            answer: answer,
-                            firstIndex: answer[0],
-                            textAtIndex: question.answers[answer[0]]?.text,
-                            allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
-                        });
-                    }
                     return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
-                }
-                // Debug for problematic questions
-                if (question.id === 'step1-q6') {
-                    console.log(`DEBUG - ${question.id} CODE_READING NUMBER processing:`, {
-                        answer: answer,
-                        textAtIndex: question.answers[answer]?.text,
-                        allAnswersWithIndex: question.answers.map((a, i) => `${i}: ${a.text}`)
-                    });
                 }
                 return question.answers[answer]?.text || answer;
 
