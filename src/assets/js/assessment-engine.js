@@ -472,17 +472,8 @@ class AssessmentEngine {
             templateString = question.template;
         }
 
-        // If user has existing code, show it, otherwise show helpful placeholder
-        const codeContent = savedAnswer || `        /* 📝 Write only your method body code here
-         * ❌ DON'T write: class, imports, or method signature
-         * ✅ DO write: variables, loops, conditions, return statement
-         *
-         * Example: For a method that adds two numbers, write:
-         *    int result = a + b;
-         *    return result;
-         */
-
-        // Your implementation goes here
+        // If user has existing code, show it, otherwise show simple placeholder
+        const codeContent = savedAnswer || `        // Your implementation goes here
         `;
 
         return templateString.replace('{{USER_CODE}}', codeContent);
