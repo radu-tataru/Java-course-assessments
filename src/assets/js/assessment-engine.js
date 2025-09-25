@@ -236,9 +236,9 @@ class AssessmentEngine {
             <div class="coding-challenge">
                 <div class="challenge-requirements">
                     <h5>Requirements:</h5>
-                    <ul>
-                        ${question.requirements.map(req => `<li>${req}</li>`).join('')}
-                    </ul>
+                    <div class="requirements-list">
+                        ${question.requirements.map(req => `<div class="requirement-item">${req}</div>`).join('')}
+                    </div>
                 </div>
 
                 <div class="code-editor mt-4">
