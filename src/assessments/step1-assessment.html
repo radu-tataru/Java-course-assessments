@@ -248,8 +248,9 @@
         // Global variables
         let assessmentEngine = null;
         let judge0 = null;
-        let timeRemaining = 30 * 60; // 30 minutes in seconds
+        let timeRemaining = 30 * 60; // 30 minutes in seconds (default)
         let timerInterval = null;
+        let assessmentStartTime = null;
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -438,6 +439,33 @@
          * Start the assessment timer
          */
         function startTimer() {
+            // Check if we're resuming or starting fresh
+            const savedStartTime = localStorage.getItem('assessment_start_time');
+            const savedTimeLimit = localStorage.getItem('assessment_time_limit');
+
+            if (savedStartTime && savedTimeLimit) {
+                // Resume: calculate remaining time based on elapsed time
+                assessmentStartTime = parseInt(savedStartTime);
+                const totalTimeLimit = parseInt(savedTimeLimit);
+                const elapsedSeconds = Math.floor((Date.now() - assessmentStartTime) / 1000);
+                timeRemaining = Math.max(0, totalTimeLimit - elapsedSeconds);
+
+                console.log(`Resuming timer: ${Math.floor(elapsedSeconds/60)} minutes elapsed, ${Math.floor(timeRemaining/60)} minutes remaining`);
+            } else {
+                // Starting fresh: save start time and time limit
+                assessmentStartTime = Date.now();
+                localStorage.setItem('assessment_start_time', assessmentStartTime.toString());
+                localStorage.setItem('assessment_time_limit', timeRemaining.toString());
+
+                console.log(`Starting new timer: ${Math.floor(timeRemaining/60)} minutes`);
+            }
+
+            // If time is already up, handle it
+            if (timeRemaining <= 0) {
+                handleTimeUp();
+                return;
+            }
+
             updateTimerDisplay();
 
             timerInterval = setInterval(() => {
@@ -454,6 +482,13 @@
                 }
 
                 updateTimerDisplay();
+
+                // Save current remaining time every 10 seconds for more precise resume
+                if (timeRemaining % 10 === 0) {
+                    const elapsedSeconds = Math.floor((Date.now() - assessmentStartTime) / 1000);
+                    const totalTimeLimit = parseInt(localStorage.getItem('assessment_time_limit'));
+                    localStorage.setItem('assessment_time_remaining', (totalTimeLimit - elapsedSeconds).toString());
+                }
             }, 1000);
         }
 
@@ -482,8 +517,23 @@
         function handleTimeUp() {
             alert('Time is up! Your assessment will be submitted automatically.');
 
+            clearTimerData();
+
             if (assessmentEngine) {
                 assessmentEngine.finishAssessment();
+            }
+        }
+
+        /**
+         * Clear timer data from localStorage
+         */
+        function clearTimerData() {
+            localStorage.removeItem('assessment_start_time');
+            localStorage.removeItem('assessment_time_limit');
+            localStorage.removeItem('assessment_time_remaining');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
             }
         }
 

@@ -808,6 +808,11 @@ class AssessmentEngine {
         if (this.autoSaveTimer) {
             clearInterval(this.autoSaveTimer);
         }
+
+        // Notify parent page that assessment is finished (for timer cleanup)
+        if (typeof window.clearTimerData === 'function') {
+            window.clearTimerData();
+        }
     }
 
     /**
