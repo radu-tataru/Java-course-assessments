@@ -91,13 +91,17 @@
       "type": "coding_challenge",
       "question": "Complete the method body that reads a CSV file and counts how many lines contain a specific word.",
       "requirements": [
-        "Write only the method body (inside the curly braces)",
-        "Use BufferedReader to read the file line by line",
-        "Return an int representing the count of lines containing the search word",
-        "Handle IOException properly with try-catch",
-        "Search should be case-insensitive (use toLowerCase())",
-        "Don't write 'public class' - just the method implementation",
-        "⚠️ IMPORTANT: All your code should be properly indented as method body content"
+        "📝 WHAT TO WRITE: Only write the method body code (what goes inside the { } braces)",
+        "❌ DON'T WRITE: class definitions, import statements, or method signatures",
+        "✅ DO WRITE: Variable declarations, loops, conditions, return statements",
+        "📚 TECHNICAL REQUIREMENTS:",
+        "  • Use BufferedReader to read the file line by line",
+        "  • Return an int representing the count of lines containing the search word",
+        "  • Handle IOException with try-catch block",
+        "  • Search should be case-insensitive (use toLowerCase())",
+        "💡 EXAMPLE: If you were completing 'public int add(int a, int b) { ... }', you would write:",
+        "    return a + b;",
+        "🎯 TIP: Focus on the core logic - file reading, counting, and error handling"
       ],
       "template": [
         "import java.io.*;",
@@ -161,13 +165,19 @@
       "type": "coding_challenge",
       "question": "Complete the method body that reads a JSON file containing an array of objects with 'url' and 'name' fields, and returns a List of just the URLs.",
       "requirements": [
-        "Write only the method body (inside the curly braces)",
-        "Use Files.readAllBytes() to read the file content",
-        "Parse JSON using JSONArray and JSONObject",
-        "Return List<String> containing all URLs from the JSON array",
-        "Handle exceptions properly with try-catch",
-        "Don't write 'public class' - just the method implementation",
-        "⚠️ IMPORTANT: All your code should be properly indented as method body content"
+        "📝 WHAT TO WRITE: Only write the method body code (what goes inside the { } braces)",
+        "❌ DON'T WRITE: class definitions, import statements, or method signatures",
+        "✅ DO WRITE: Variable declarations, file reading code, JSON parsing, return statements",
+        "📚 TECHNICAL REQUIREMENTS:",
+        "  • Use Files.readAllBytes() to read the file content",
+        "  • Parse JSON using JSONArray and JSONObject classes",
+        "  • Return List<String> containing all URLs from the JSON array",
+        "  • Handle exceptions with try-catch block",
+        "💡 EXAMPLE: If you were completing 'public List<String> getNames() { ... }', you would write:",
+        "    List<String> names = new ArrayList<>();",
+        "    // your logic here",
+        "    return names;",
+        "🎯 TIP: Read file → parse JSON → extract URLs → return list"
       ],
       "template": [
         "import java.io.*;",
