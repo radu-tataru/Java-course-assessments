@@ -563,12 +563,6 @@ class AssessmentJudge0 extends Judge0Integration {
     }
 
     prepareExecutableCode(questionData, userCode) {
-            questionType: questionData.type,
-            hasTemplate: !!questionData.template,
-            userCodeLength: userCode.length,
-            userCodePreview: userCode.substring(0, 100) + (userCode.length > 100 ? '...' : ''),
-            stackTrace: new Error().stack.split('\n').slice(1,6).map(line => line.trim())
-        });
 
         switch (questionData.type) {
             case CONFIG.QUESTION_TYPES.CODING_CHALLENGE:
@@ -588,14 +582,6 @@ class AssessmentJudge0 extends Judge0Integration {
                     // Validate and fix common user code issues
                     const validatedUserCode = this.validateAndFixUserCode(cleanUserCode, questionData);
                     const preparedCode = templateString.replace('{{USER_CODE}}', validatedUserCode);
-
-                        templateType: Array.isArray(questionData.template) ? 'array' : 'string',
-                        templateLength: templateString.length,
-                        originalUserCode: cleanUserCode,
-                        validatedUserCode: validatedUserCode,
-                        preparedCodeLength: preparedCode.length,
-                        preparedCodePreview: preparedCode.substring(0, 400) + '...'
-                    });
 
                     return preparedCode;
                 }

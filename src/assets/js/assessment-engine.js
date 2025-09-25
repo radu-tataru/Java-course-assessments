@@ -1007,6 +1007,11 @@ class AssessmentEngine {
         const question = this.questions[this.currentQuestionIndex];
         const questionResult = results.questionResults[this.currentQuestionIndex];
 
+        // Debug logging to see what's in the question result
+        if (question.type === CONFIG.QUESTION_TYPES.CODE_READING) {
+            console.log('DEBUG - Question Result for', question.id, ':', questionResult);
+        }
+
         const reviewClass = questionResult.isCorrect ? 'correct' : 'incorrect';
         const statusIcon = questionResult.isCorrect ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger';
 
