@@ -454,6 +454,18 @@ class AssessmentJudge0 extends Judge0Integration {
                         templateString = questionData.template;
                     }
 
+                    // For debugging: create a minimal working Java program
+                    if (cleanUserCode.trim() === 'return 2;') {
+                        const testCode = `
+public class Solution {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}`.trim();
+                        console.log('Using debug test code:', testCode);
+                        return testCode;
+                    }
+
                     // Validate and fix common user code issues
                     const validatedUserCode = this.validateAndFixUserCode(cleanUserCode, questionData);
                     const preparedCode = templateString.replace('{{USER_CODE}}', validatedUserCode);
