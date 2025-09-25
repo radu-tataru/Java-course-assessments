@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 1 Assessment - Basic File Reading | Java Course Assessment System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Code highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+
+    <style>
+        .student-info {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f3e5f5 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
+        .time-remaining {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .assessment-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .welcome-screen .icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .start-button {
+            background: var(--success-color);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 2rem;
+        }
+
+        .start-button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .time-remaining {
+                position: static;
+                margin-bottom: 1rem;
+                display: block;
+                text-align: center;
+            }
+
+            .assessment-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Assessment Header -->
+    <div class="assessment-header">
+        <div class="container">
+            <div class="assessment-container">
+                <h1 class="assessment-title">
+                    <i class="bi bi-file-text me-2"></i>
+                    Step 1: Basic File Reading Assessment
+                </h1>
+                <p class="assessment-subtitle">
+                    Test your understanding of Java file I/O operations and data parsing
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Remaining (will be shown during assessment) -->
+    <div class="time-remaining" id="time-remaining" style="display: none;">
+        <i class="bi bi-clock me-1"></i>
+        <span id="time-text">30:00</span>
+    </div>
+
+    <div class="container">
+        <div class="assessment-container">
+            <!-- Progress Bar (will be shown during assessment) -->
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Question 1 of 10</div>
+            </div>
+
+            <!-- Welcome Screen -->
+            <div id="welcome-screen" class="welcome-screen">
+                <div class="question-card">
+                    <div class="question-content">
+                        <div class="icon">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                        <h3>Ready to Start Your Assessment?</h3>
+                        <p class="lead">This assessment covers the concepts from <strong>Step 1: Basic File Reading</strong></p>
+
+                        <div class="row text-start mt-4">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-info-circle me-2 text-primary"></i>Assessment Details:</h6>
+                                <ul class="list-unstyled ms-4">
+                                    <li><i class="bi bi-check text-success me-2"></i>10 Questions</li>
+                                    <li><i class="bi bi-check text-success me-2"></i>30 Minutes Time Limit</li>
+                                    <li><i class="bi bi-check text-success me-2"></i>70% to Pass</li>
+                                    <li><i class="bi bi-check text-success me-2"></i>Multiple Attempts Allowed</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-lightbulb me-2 text-warning"></i>Question Types:</h6>
+                                <ul class="list-unstyled ms-4">
+                                    <li><i class="bi bi-dot"></i>Multiple Choice</li>
+                                    <li><i class="bi bi-dot"></i>Code Reading</li>
+                                    <li><i class="bi bi-dot"></i>Code Completion</li>
+                                    <li><i class="bi bi-dot"></i>Coding Challenges</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Student Information Form -->
+                        <div class="student-info mt-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="student-id" class="form-label">Student ID:</label>
+                                    <input type="text" id="student-id" class="form-control"
+                                           placeholder="Enter your student ID" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="student-name" class="form-label">Full Name (optional):</label>
+                                    <input type="text" id="student-name" class="form-control"
+                                           placeholder="Enter your full name">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="instructions mt-4">
+                            <h6><i class="bi bi-exclamation-triangle me-2"></i>Important Instructions:</h6>
+                            <ul class="mb-0">
+                                <li>Read each question carefully before answering</li>
+                                <li>For coding challenges, your code will be automatically tested</li>
+                                <li>You can navigate between questions using the Previous/Next buttons</li>
+                                <li>Your progress is automatically saved</li>
+                                <li>Make sure you have a stable internet connection</li>
+                            </ul>
+                        </div>
+
+                        <button class="start-button" id="start-assessment">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Start Assessment
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Content (will be populated by JavaScript) -->
+            <div id="assessment-content" style="display: none;">
+                <!-- Questions will be rendered here by the AssessmentEngine -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Configuration -->
+    <script src="../assets/js/config.js"></script>
+
+    <!-- Assessment Engine -->
+    <script src="../assets/js/assessment-engine.js"></script>
+
+    <!-- Judge0 Integration -->
+    <script src="../assets/js/judge0-integration.js"></script>
+
+    <script>
+        // Global variables
+        let assessmentEngine = null;
+        let judge0 = null;
+        let timeRemaining = 30 * 60; // 30 minutes in seconds
+        let timerInterval = null;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            initializeAssessment();
+        });
+
+        /**
+         * Setup event listeners
+         */
+        function setupEventListeners() {
+            document.getElementById('start-assessment').addEventListener('click', startAssessment);
+
+            // Handle page visibility changes to pause/resume timer
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    // Page is hidden, could pause timer or show warning
+                    console.log('Assessment tab is not active');
+                } else {
+                    // Page is visible again
+                    console.log('Assessment tab is active');
+                }
+            });
+
+            // Prevent accidental page close during assessment
+            window.addEventListener('beforeunload', function(e) {
+                if (assessmentEngine && timeRemaining > 0) {
+                    e.preventDefault();
+                    e.returnValue = 'Your assessment progress will be lost. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
+            });
+        }
+
+        /**
+         * Initialize assessment system
+         */
+        function initializeAssessment() {
+            // Initialize Judge0 integration
+            judge0 = new AssessmentJudge0();
+
+            // Check for existing progress
+            checkExistingProgress();
+        }
+
+        /**
+         * Check if student has existing progress
+         */
+        function checkExistingProgress() {
+            const savedProgress = localStorage.getItem(CONFIG.STORAGE_KEYS.CURRENT_ASSESSMENT);
+            if (savedProgress) {
+                try {
+                    const progress = JSON.parse(savedProgress);
+                    if (progress.questions && progress.questions[0] && progress.questions[0].id.startsWith('step1-')) {
+                        // Show option to resume
+                        showResumeOption(progress);
+                    }
+                } catch (error) {
+                    console.error('Error parsing saved progress:', error);
+                }
+            }
+        }
+
+        /**
+         * Show option to resume previous attempt
+         */
+        function showResumeOption(progress) {
+            const welcomeCard = document.querySelector('#welcome-screen .question-content');
+            const resumeAlert = `
+                <div class="alert alert-warning mt-3">
+                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Previous Attempt Found</h6>
+                    <p class="mb-2">You have an unfinished assessment. Would you like to resume where you left off?</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-warning btn-sm" onclick="resumeAssessment()">
+                            <i class="bi bi-play me-1"></i>Resume
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="clearProgress()">
+                            <i class="bi bi-trash me-1"></i>Start Fresh
+                        </button>
+                    </div>
+                </div>
+            `;
+            welcomeCard.insertAdjacentHTML('beforeend', resumeAlert);
+        }
+
+        /**
+         * Resume previous assessment
+         */
+        function resumeAssessment() {
+            const studentId = document.getElementById('student-id').value || 'anonymous';
+            startAssessmentWithOptions({
+                studentId: studentId,
+                stepNumber: 1,
+                resumeProgress: true
+            });
+        }
+
+        /**
+         * Clear previous progress
+         */
+        function clearProgress() {
+            localStorage.removeItem(CONFIG.STORAGE_KEYS.CURRENT_ASSESSMENT);
+            document.querySelector('.alert-warning').remove();
+        }
+
+        /**
+         * Start the assessment
+         */
+        function startAssessment() {
+            const studentId = document.getElementById('student-id').value.trim();
+            if (!studentId) {
+                alert('Please enter your Student ID before starting the assessment.');
+                document.getElementById('student-id').focus();
+                return;
+            }
+
+            startAssessmentWithOptions({
+                studentId: studentId,
+                stepNumber: 1,
+                resumeProgress: false
+            });
+        }
+
+        /**
+         * Start assessment with given options
+         */
+        function startAssessmentWithOptions(options) {
+            // Hide welcome screen
+            document.getElementById('welcome-screen').style.display = 'none';
+
+            // Show assessment interface
+            document.getElementById('assessment-content').style.display = 'block';
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('time-remaining').style.display = 'block';
+
+            // Initialize assessment engine
+            assessmentEngine = new AssessmentEngine('assessment-content', {
+                studentId: options.studentId,
+                stepNumber: options.stepNumber,
+                showProgress: true,
+                shuffleQuestions: false,
+                shuffleAnswers: true,
+                timeLimit: 30 * 60, // 30 minutes
+                autoSave: true
+            });
+
+            // Extend assessment engine with code execution
+            setupCodeExecution();
+
+            // Load questions
+            loadQuestionsAndStart();
+
+            // Start timer
+            startTimer();
+        }
+
+        /**
+         * Setup code execution functionality
+         */
+        function setupCodeExecution() {
+            // Override the executeCode method in assessment engine
+            const originalSetupQuestionHandlers = assessmentEngine.setupQuestionHandlers.bind(assessmentEngine);
+
+            assessmentEngine.setupQuestionHandlers = function(question) {
+                originalSetupQuestionHandlers(question);
+
+                // Add code execution handler
+                const executeBtn = assessmentEngine.container.querySelector('[data-execute-code]');
+                if (executeBtn) {
+                    executeBtn.addEventListener('click', () => {
+                        executeUserCode(question);
+                    });
+                }
+            };
+        }
+
+        /**
+         * Execute user code using Judge0
+         */
+        async function executeUserCode(question) {
+            const executeBtn = assessmentEngine.container.querySelector('[data-execute-code]');
+            const resultDiv = assessmentEngine.container.querySelector('[data-execution-result]');
+            const codeTextarea = assessmentEngine.container.querySelector('[data-question-input]');
+
+            if (!codeTextarea || !resultDiv) return;
+
+            const userCode = codeTextarea.value.trim();
+            if (!userCode) {
+                showExecutionResult(resultDiv, 'Please write some code before executing.', 'error');
+                return;
+            }
+
+            // Show loading state
+            executeBtn.disabled = true;
+            executeBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Executing...';
+            showExecutionResult(resultDiv, 'Compiling and executing your code...', 'pending');
+
+            try {
+                // Execute code using Judge0
+                const result = await judge0.executeAssessmentCode(question, userCode);
+
+                // Display result
+                if (result.success) {
+                    let message = `✅ Execution successful!\n\nOutput:\n${result.output || '(no output)'}`;
+
+                    if (result.testResults && result.testResults.length > 0) {
+                        message += `\n\n📊 Test Results:\n${result.feedback}`;
+                    }
+
+                    if (result.executionTime) {
+                        message += `\n\n⏱️ Execution time: ${result.executionTime}ms`;
+                    }
+
+                    showExecutionResult(resultDiv, message, 'success');
+                } else {
+                    showExecutionResult(resultDiv, `❌ ${result.feedback || result.error}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Code execution error:', error);
+                showExecutionResult(resultDiv, `❌ Execution failed: ${error.message}`, 'error');
+            } finally {
+                // Reset button
+                executeBtn.disabled = false;
+                executeBtn.innerHTML = '<i class="bi bi-play-fill me-1"></i> Run Code';
+            }
+        }
+
+        /**
+         * Show execution result
+         */
+        function showExecutionResult(resultDiv, message, type) {
+            resultDiv.style.display = 'block';
+            resultDiv.className = `execution-result ${type}`;
+            resultDiv.textContent = message;
+        }
+
+        /**
+         * Load questions from JSON file
+         */
+        async function loadQuestionsAndStart() {
+            try {
+                const response = await fetch('../../data/questions/step1-questions.json');
+                const questionsData = await response.json();
+
+                // Start assessment with loaded questions
+                await assessmentEngine.loadQuestions(questionsData);
+
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                assessmentEngine.showError('Failed to load assessment questions. Please refresh the page and try again.');
+            }
+        }
+
+        /**
+         * Start the assessment timer
+         */
+        function startTimer() {
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+
+                if (timeRemaining <= 0) {
+                    // Time's up!
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                } else if (timeRemaining === 300) { // 5 minutes remaining
+                    showTimeWarning('5 minutes remaining!');
+                } else if (timeRemaining === 60) { // 1 minute remaining
+                    showTimeWarning('1 minute remaining!');
+                }
+
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        /**
+         * Update timer display
+         */
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const timeText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            document.getElementById('time-text').textContent = timeText;
+
+            // Change color based on time remaining
+            const timeDiv = document.getElementById('time-remaining');
+            if (timeRemaining <= 60) {
+                timeDiv.style.backgroundColor = 'var(--danger-color)';
+            } else if (timeRemaining <= 300) {
+                timeDiv.style.backgroundColor = 'var(--warning-color)';
+            }
+        }
+
+        /**
+         * Handle when time runs out
+         */
+        function handleTimeUp() {
+            alert('Time is up! Your assessment will be submitted automatically.');
+
+            if (assessmentEngine) {
+                assessmentEngine.finishAssessment();
+            }
+        }
+
+        /**
+         * Show time warning
+         */
+        function showTimeWarning(message) {
+            // Could show toast notification or modal
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-warning position-fixed';
+            toast.style.top = '80px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '1001';
+            toast.innerHTML = `<i class="bi bi-clock me-2"></i>${message}`;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 3000);
+        }
+
+        // Highlight code blocks when they're added to the page
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            const codeBlocks = node.querySelectorAll ? node.querySelectorAll('pre code') : [];
+                            codeBlocks.forEach(function(block) {
+                                hljs.highlightElement(block);
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment
+.env
+config.local.js
+
+# Student submissions (keep structure, not data)
+data/submissions/*.json
+!data/submissions/.gitkeep
+
+# Build artifacts
+dist/
+build/

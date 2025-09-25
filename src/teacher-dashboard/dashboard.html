@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Java Course Assessment System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .dashboard-sidebar {
+            background: var(--bg-gradient);
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .dashboard-content {
+            margin-left: 250px;
+            padding: 2rem;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .student-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .student-table .table {
+            margin-bottom: 0;
+        }
+
+        .badge-step {
+            background: var(--primary-color);
+        }
+
+        .progress-bar-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .export-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .dashboard-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .dashboard-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="dashboard-sidebar">
+        <div class="p-4">
+            <h4 class="mb-0">
+                <i class="bi bi-mortarboard"></i> Teacher Dashboard
+            </h4>
+            <small class="text-white-50">Java Course Assessment</small>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li><a href="#overview" class="nav-link active" data-section="overview">
+                <i class="bi bi-graph-up me-2"></i> Overview
+            </a></li>
+            <li><a href="#students" class="nav-link" data-section="students">
+                <i class="bi bi-people me-2"></i> Students
+            </a></li>
+            <li><a href="#assessments" class="nav-link" data-section="assessments">
+                <i class="bi bi-clipboard-check me-2"></i> Assessments
+            </a></li>
+            <li><a href="#analytics" class="nav-link" data-section="analytics">
+                <i class="bi bi-bar-chart-line me-2"></i> Analytics
+            </a></li>
+            <li><a href="#questions" class="nav-link" data-section="questions">
+                <i class="bi bi-question-circle me-2"></i> Question Bank
+            </a></li>
+            <li><a href="#export" class="nav-link" data-section="export">
+                <i class="bi bi-download me-2"></i> Export Data
+            </a></li>
+        </ul>
+
+        <div class="mt-auto p-3 border-top border-white border-opacity-25">
+            <small class="text-white-50">
+                <i class="bi bi-person-circle me-1"></i>
+                <span id="teacher-name">Instructor</span>
+            </small>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Overview Section -->
+        <div id="overview-section" class="dashboard-section">
+            <div class="dashboard-header">
+                <h2 class="mb-1">Assessment Overview</h2>
+                <p class="text-muted mb-0">Monitor student progress and assessment performance</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-students">0</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completed-assessments">0</div>
+                    <div class="stat-label">Completed Assessments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="average-score">0%</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="passing-rate">0%</div>
+                    <div class="stat-label">Passing Rate</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="chart-container">
+                <h5 class="mb-3">Recent Assessment Activity</h5>
+                <div id="recent-activity">
+                    <!-- Recent activity will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="students-section" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2 class="mb-1">Student Progress</h2>
+                <p class="text-muted mb-0">View individual student performance and progress</p>
+            </div>
+
+            <div class="student-table">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Latest Step</th>
+                                <th>Progress</th>
+                                <th>Average Score</th>
+                                <th>Last Activity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body">
+                            <!-- Student data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessments Section -->
+        <div id="assessments-section" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2 class="mb-1">Assessment Results</h2>
+                <p class="text-muted mb-0">Detailed results for each assessment step</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>Assessments by Step</h6>
+                        <canvas id="step-distribution-chart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="chart-container">
+                        <h6>Score Distribution</h6>
+                        <canvas id="score-distribution-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="student-table mt-4">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h6 class="mb-0">All Assessment Submissions</h6>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="step-filter">
+                            <option value="">All Steps</option>
+                        </select>
+                        <select class="form-select form-select-sm" id="status-filter">
+                            <option value="">All Results</option>
+                            <option value="passed">Passed</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Step</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Duration</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessments-table-body">
+                            <!-- Assessment data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics-section" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2 class="mb-1">Learning Analytics</h2>
+                <p class="text-muted mb-0">Insights into learning patterns and performance trends</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Performance Trends</h6>
+                        <canvas id="performance-trends-chart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Question Type Performance</h6>
+                        <canvas id="question-type-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="chart-container">
+                        <h6>Time Spent Analysis</h6>
+                        <canvas id="time-analysis-chart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>Common Mistakes</h6>
+                        <div id="common-mistakes-list">
+                            <!-- Common mistakes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions Section -->
+        <div id="questions-section" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2 class="mb-1">Question Bank Management</h2>
+                <p class="text-muted mb-0">Manage assessment questions and create new assessments</p>
+            </div>
+
+            <div class="export-controls">
+                <button class="btn btn-primary" data-add-question>
+                    <i class="bi bi-plus-circle me-2"></i>Add Question
+                </button>
+                <button class="btn btn-success" data-import-questions>
+                    <i class="bi bi-upload me-2"></i>Import Questions
+                </button>
+                <select class="form-select" style="width: auto;" id="question-step-filter">
+                    <option value="">All Steps</option>
+                </select>
+            </div>
+
+            <div class="student-table">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Question</th>
+                                <th>Type</th>
+                                <th>Step</th>
+                                <th>Difficulty</th>
+                                <th>Success Rate</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questions-table-body">
+                            <!-- Questions will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div id="export-section" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2 class="mb-1">Export Data</h2>
+                <p class="text-muted mb-0">Download assessment data and generate reports</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5>Student Progress Report</h5>
+                        <p class="text-muted">Export individual student progress and scores</p>
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Students:</label>
+                            <select multiple class="form-select" id="export-students">
+                                <option value="all">All Students</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Include:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include-scores" checked>
+                                <label class="form-check-label" for="include-scores">Assessment Scores</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include-details" checked>
+                                <label class="form-check-label" for="include-details">Answer Details</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="include-timing">
+                                <label class="form-check-label" for="include-timing">Time Analysis</label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success" data-export-csv>
+                                <i class="bi bi-file-spreadsheet me-2"></i>Export as CSV
+                            </button>
+                            <button class="btn btn-danger" data-export-pdf>
+                                <i class="bi bi-file-pdf me-2"></i>Export as PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5>Analytics Report</h5>
+                        <p class="text-muted">Generate comprehensive analytics and insights</p>
+
+                        <div class="mb-3">
+                            <label class="form-label">Report Type:</label>
+                            <select class="form-select" id="report-type">
+                                <option value="overview">Course Overview</option>
+                                <option value="detailed">Detailed Analytics</option>
+                                <option value="questions">Question Analysis</option>
+                                <option value="progress">Progress Tracking</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Date Range:</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="date" class="form-control" id="date-from">
+                                </div>
+                                <div class="col-6">
+                                    <input type="date" class="form-control" id="date-to">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" data-generate-report>
+                                <i class="bi bi-graph-up me-2"></i>Generate Report
+                            </button>
+                            <button class="btn btn-outline-secondary" data-schedule-report>
+                                <i class="bi bi-calendar me-2"></i>Schedule Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Configuration -->
+    <script src="../assets/js/config.js"></script>
+
+    <!-- Dashboard JS -->
+    <script src="dashboard.js"></script>
+</body>
+</html>
