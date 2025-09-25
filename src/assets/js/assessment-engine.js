@@ -871,6 +871,40 @@ class AssessmentEngine {
                 } else if (question.type === CONFIG.QUESTION_TYPES.TRUE_FALSE) {
                     isCorrect = userAnswer === question.correctAnswer.toString();
                     questionScore = isCorrect ? 1 : 0;
+                } else if (question.type === CONFIG.QUESTION_TYPES.CODE_COMPLETION) {
+                    // For code completion, check if user answer matches the expected answer
+                    if (userAnswer && question.correctAnswer) {
+                        // Normalize both answers for comparison (remove extra whitespace)
+                        const normalizedUserAnswer = userAnswer.trim().replace(/\s+/g, ' ');
+                        const normalizedCorrectAnswer = question.correctAnswer.trim().replace(/\s+/g, ' ');
+                        isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
+                        questionScore = isCorrect ? 1 : 0;
+                    }
+                } else if (question.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE) {
+                    // For coding challenges, we assume they are manually scored or auto-scored elsewhere
+                    // For now, give partial credit if user provided an answer
+                    if (userAnswer && userAnswer.trim() && !userAnswer.includes('/* Write your code here */')) {
+                        questionScore = 0.5; // Partial credit for attempting
+                        // In a full implementation, this would be based on test results
+                    }
+                } else if (question.type === CONFIG.QUESTION_TYPES.CODE_READING) {
+                    // Handle code reading questions (similar to multiple choice)
+                    if (Array.isArray(question.correctAnswer)) {
+                        // Multiple correct answers
+                        if (Array.isArray(userAnswer) && userAnswer.length > 0) {
+                            const correctSet = new Set(question.correctAnswer);
+                            const userSet = new Set(userAnswer);
+                            const intersection = new Set([...userSet].filter(x => correctSet.has(x)));
+                            questionScore = intersection.size / correctSet.size;
+                            isCorrect = questionScore === 1;
+                        }
+                    } else {
+                        // Single correct answer
+                        isCorrect = Array.isArray(userAnswer) &&
+                                   userAnswer.length === 1 &&
+                                   userAnswer[0] === question.correctAnswer;
+                        questionScore = isCorrect ? 1 : 0;
+                    }
                 }
             }
 
@@ -962,6 +996,167 @@ class AssessmentEngine {
         this.container.querySelector('[data-restart-assessment]').addEventListener('click', () => {
             this.restartAssessment();
         });
+    }
+
+    /**
+     * Review answers functionality
+     */
+    reviewAnswers(results) {
+        // Go back to the first question and show review mode
+        this.reviewMode = true;
+        this.currentQuestionIndex = 0;
+        this.showQuestionWithReview(results);
+    }
+
+    /**
+     * Show question in review mode with correct/incorrect indicators
+     */
+    showQuestionWithReview(results) {
+        const question = this.questions[this.currentQuestionIndex];
+        const questionResult = results.questionResults[this.currentQuestionIndex];
+
+        const reviewClass = questionResult.isCorrect ? 'correct' : 'incorrect';
+        const statusIcon = questionResult.isCorrect ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger';
+
+        const reviewHtml = `
+            <div class="question-card review-mode ${reviewClass}">
+                <div class="question-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="question-number">Question ${this.currentQuestionIndex + 1} of ${this.questions.length}</span>
+                            <span class="question-type">${this.formatQuestionType(question.type)}</span>
+                        </div>
+                        <div class="question-status">
+                            <i class="bi ${statusIcon}"></i>
+                            ${questionResult.isCorrect ? 'Correct' : 'Incorrect'}
+                            <span class="text-muted">(${questionResult.score.toFixed(1)}/${question.points || 1} points)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-content">
+                    <div class="question-text">${question.question}</div>
+
+                    ${question.requirements ? `
+                        <div class="challenge-requirements mt-3">
+                            <h6>Requirements:</h6>
+                            <div class="requirements-list">
+                                ${question.requirements.map(req => `<div class="requirement-item">${req}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${question.code ? `<div class="code-block mt-3"><pre><code>${question.code}</code></pre></div>` : ''}
+
+                    <div class="review-answers mt-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Your Answer:</h6>
+                                <div class="user-answer">
+                                    ${this.formatAnswerForReview(question, questionResult.userAnswer)}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-success">Correct Answer:</h6>
+                                <div class="correct-answer">
+                                    ${this.formatAnswerForReview(question, questionResult.correctAnswer)}
+                                </div>
+                            </div>
+                        </div>
+
+                        ${question.explanation ? `
+                            <div class="mt-3">
+                                <h6 class="text-info">Explanation:</h6>
+                                <div class="explanation">${question.explanation}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <div class="assessment-navigation">
+                <button class="btn-secondary" ${this.currentQuestionIndex === 0 ? 'disabled' : ''} data-prev-review>
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+
+                <div class="text-center">
+                    <span class="progress-text">Reviewing ${this.currentQuestionIndex + 1} of ${this.questions.length}</span>
+                </div>
+
+                ${this.currentQuestionIndex < this.questions.length - 1 ?
+                    '<button class="btn-primary" data-next-review><i class="bi bi-arrow-right"></i> Next</button>' :
+                    '<button class="btn-secondary" data-back-to-results><i class="bi bi-arrow-left"></i> Back to Results</button>'
+                }
+            </div>
+        `;
+
+        this.container.innerHTML = reviewHtml;
+        this.setupReviewNavigation(results);
+    }
+
+    /**
+     * Format answer for review display
+     */
+    formatAnswerForReview(question, answer) {
+        if (!answer) return '<em class="text-muted">No answer provided</em>';
+
+        switch (question.type) {
+            case CONFIG.QUESTION_TYPES.MULTIPLE_CHOICE:
+                if (Array.isArray(answer)) {
+                    return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
+                }
+                return question.answers[answer]?.text || `Option ${answer + 1}`;
+
+            case CONFIG.QUESTION_TYPES.TRUE_FALSE:
+                return answer === 'true' ? 'True' : 'False';
+
+            case CONFIG.QUESTION_TYPES.CODE_COMPLETION:
+            case CONFIG.QUESTION_TYPES.CODING_CHALLENGE:
+                return `<pre class="code-answer">${answer}</pre>`;
+
+            case CONFIG.QUESTION_TYPES.CODE_READING:
+                if (Array.isArray(answer)) {
+                    return answer.map(index => question.answers[index]?.text || `Option ${index + 1}`).join('<br>');
+                }
+                return question.answers[answer]?.text || answer;
+
+            default:
+                return answer.toString();
+        }
+    }
+
+    /**
+     * Setup navigation for review mode
+     */
+    setupReviewNavigation(results) {
+        const prevBtn = this.container.querySelector('[data-prev-review]');
+        const nextBtn = this.container.querySelector('[data-next-review]');
+        const backBtn = this.container.querySelector('[data-back-to-results]');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (this.currentQuestionIndex > 0) {
+                    this.currentQuestionIndex--;
+                    this.showQuestionWithReview(results);
+                }
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (this.currentQuestionIndex < this.questions.length - 1) {
+                    this.currentQuestionIndex++;
+                    this.showQuestionWithReview(results);
+                }
+            });
+        }
+
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.reviewMode = false;
+                this.showResults(results);
+            });
+        }
     }
 
     // Utility methods
