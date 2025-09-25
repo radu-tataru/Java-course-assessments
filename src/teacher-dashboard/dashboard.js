@@ -353,6 +353,7 @@ class TeacherDashboard {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                aspectRatio: 1,
                 plugins: {
                     legend: {
                         position: 'bottom'
