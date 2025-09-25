@@ -394,13 +394,23 @@ class AssessmentJudge0 extends Judge0Integration {
                 if (questionData.template) {
                     // Clean the user code - remove any extra whitespace/newlines
                     const cleanUserCode = userCode.trim();
-                    const preparedCode = questionData.template.replace('{{USER_CODE}}', cleanUserCode);
+
+                    // Handle both string and array templates
+                    let templateString;
+                    if (Array.isArray(questionData.template)) {
+                        templateString = questionData.template.join('\n');
+                    } else {
+                        templateString = questionData.template;
+                    }
+
+                    const preparedCode = templateString.replace('{{USER_CODE}}', cleanUserCode);
 
                     console.log('Template replacement:', {
-                        originalTemplate: questionData.template.substring(0, 100) + '...',
+                        templateType: Array.isArray(questionData.template) ? 'array' : 'string',
+                        templateLength: templateString.length,
                         userCode: cleanUserCode,
                         preparedCodeLength: preparedCode.length,
-                        preparedCodePreview: preparedCode.substring(0, 200) + '...'
+                        preparedCodePreview: preparedCode.substring(0, 300) + '...'
                     });
 
                     return preparedCode;

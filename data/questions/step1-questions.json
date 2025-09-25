@@ -98,7 +98,28 @@
         "Search should be case-insensitive (use toLowerCase())",
         "Don't write 'public class' - just the method implementation"
       ],
-      "template": "import java.io.*;\nimport java.nio.file.*;\nimport java.util.*;\n\npublic class Solution {\n    public int countLinesWithWord(String filePath, String searchWord) throws IOException {\n        {{USER_CODE}}\n    }\n    \n    public static void main(String[] args) {\n        Solution solution = new Solution();\n        try {\n            // Test with sample data  \n            int result = solution.countLinesWithWord(\"test.csv\", \"Apple\");\n            System.out.println(result);\n        } catch (IOException e) {\n            System.err.println(\"Error: \" + e.getMessage());\n        }\n    }\n}",
+      "template": [
+        "import java.io.*;",
+        "import java.nio.file.*;",
+        "import java.util.*;",
+        "",
+        "public class Solution {",
+        "    public int countLinesWithWord(String filePath, String searchWord) throws IOException {",
+        "        {{USER_CODE}}",
+        "    }",
+        "    ",
+        "    public static void main(String[] args) {",
+        "        Solution solution = new Solution();",
+        "        try {",
+        "            // Test with sample data",
+        "            int result = solution.countLinesWithWord(\"test.csv\", \"Apple\");",
+        "            System.out.println(result);",
+        "        } catch (IOException e) {",
+        "            System.err.println(\"Error: \" + e.getMessage());",
+        "        }",
+        "    }",
+        "}"
+      ],
       "testCases": [
         {
           "input": "test.csv contains: \"Apple,Red\\nBanana,Yellow\\nApple,Green\\nOrange,Orange\"",
@@ -146,7 +167,29 @@
         "Handle exceptions properly with try-catch",
         "Don't write 'public class' - just the method implementation"
       ],
-      "template": "import java.io.*;\nimport java.nio.file.*;\nimport java.util.*;\nimport org.json.*;\n\npublic class Solution {\n    public List<String> extractUrlsFromJsonFile(String filePath) throws IOException {\n        // Write your implementation here\n        {{USER_CODE}}\n    }\n    \n    public static void main(String[] args) {\n        Solution solution = new Solution();\n        try {\n            List<String> urls = solution.extractUrlsFromJsonFile(\"test.json\");\n            System.out.println(urls);\n        } catch (IOException e) {\n            System.err.println(\"Error: \" + e.getMessage());\n        }\n    }\n}",
+      "template": [
+        "import java.io.*;",
+        "import java.nio.file.*;",
+        "import java.util.*;",
+        "import org.json.*;",
+        "",
+        "public class Solution {",
+        "    public List<String> extractUrlsFromJsonFile(String filePath) throws IOException {",
+        "        // Write your implementation here",
+        "        {{USER_CODE}}",
+        "    }",
+        "    ",
+        "    public static void main(String[] args) {",
+        "        Solution solution = new Solution();",
+        "        try {",
+        "            List<String> urls = solution.extractUrlsFromJsonFile(\"test.json\");",
+        "            System.out.println(urls);",
+        "        } catch (IOException e) {",
+        "            System.err.println(\"Error: \" + e.getMessage());",
+        "        }",
+        "    }",
+        "}"
+      ],
       "testCases": [
         {
           "input": "JSON file contains: [{\"name\":\"Google\",\"url\":\"https://google.com\"},{\"name\":\"GitHub\",\"url\":\"https://github.com\"}]",
