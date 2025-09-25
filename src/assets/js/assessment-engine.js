@@ -710,6 +710,23 @@ class AssessmentEngine {
                 }
                 break;
 
+            case CONFIG.QUESTION_TYPES.CODE_READING:
+                // Code reading questions use the same structure as multiple choice
+                if (question.multipleCorrect) {
+                    // Handle checkboxes (if any code reading questions have multiple correct answers)
+                    answer = [];
+                    this.container.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                        answer.push(parseInt(checkbox.value));
+                    });
+                } else {
+                    // Handle radio buttons (most common case)
+                    const selected = this.container.querySelector('input[type="radio"]:checked');
+                    if (selected) {
+                        answer = [parseInt(selected.value)];
+                    }
+                }
+                break;
+
             default:
                 // Handle text inputs and coding challenges
                 let inputValue = '';
@@ -1007,11 +1024,6 @@ class AssessmentEngine {
         const question = this.questions[this.currentQuestionIndex];
         const questionResult = results.questionResults[this.currentQuestionIndex];
 
-        // Debug logging to see what's in the question result
-        if (question.type === CONFIG.QUESTION_TYPES.CODE_READING) {
-            console.log('DEBUG - Question Result for', question.id, ':', questionResult);
-        }
-
         const reviewClass = questionResult.isCorrect ? 'correct' : 'incorrect';
         const statusIcon = questionResult.isCorrect ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger';
 
@@ -1095,17 +1107,6 @@ class AssessmentEngine {
      * Format answer for review display
      */
     formatAnswerForReview(question, answer) {
-        // Debug logging to see what answer data we receive
-        if (question.type === CONFIG.QUESTION_TYPES.CODE_READING) {
-            console.log('DEBUG - Code Reading Answer:', {
-                questionId: question.id,
-                answer: answer,
-                answerType: typeof answer,
-                isArray: Array.isArray(answer),
-                answerLength: answer?.length
-            });
-        }
-
         if (!answer && answer !== 0) return '<em class="text-muted">No answer provided</em>';
 
         switch (question.type) {
