@@ -437,6 +437,12 @@ class AssessmentEngine {
             }
 
             // Execute the code
+            console.log('=== Assessment Engine executing code ===');
+            console.log('Passing userCode to Judge0:', {
+                userCodeLength: userCode.length,
+                userCodePreview: userCode.substring(0, 100) + (userCode.length > 100 ? '...' : ''),
+                questionId: question.id
+            });
             const result = await this.judge0.executeAssessmentCode(question, userCode);
             this.showExecutionResult(result.feedback || 'Code executed', result.success, result);
 
