@@ -664,10 +664,11 @@ class AssessmentEngine {
         resultContainer.style.display = 'block';
         resultContainer.className = `execution-result alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
 
-        let html = `<strong>${isSuccess ? '✅ Success' : '❌ Error'}</strong><br>${message}`;
+        // Wrap the message in <pre> to preserve formatting (line breaks, indentation)
+        let html = `<strong>${isSuccess ? '✅ Success' : '❌ Error'}</strong><br><pre style="white-space: pre-wrap; font-family: inherit; margin: 0; background: none; border: none; padding: 0;">${message}</pre>`;
 
         if (fullResult && fullResult.output) {
-            html += `<br><br><strong>Output:</strong><br><pre>${fullResult.output}</pre>`;
+            html += `<br><strong>Output:</strong><br><pre>${fullResult.output}</pre>`;
         }
 
         resultContainer.innerHTML = html;
