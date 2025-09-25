@@ -466,8 +466,14 @@ class AssessmentEngine {
             templateString = question.template;
         }
 
-        // If user has existing code, show it, otherwise show placeholder
-        const codeContent = savedAnswer || '        /* Write your code here */';
+        // If user has existing code, show it, otherwise show placeholder with clear boundaries
+        const codeContent = savedAnswer || `        /* ============================================
+         * WRITE YOUR CODE BETWEEN THESE COMMENTS
+         * ============================================ */
+
+        /* Write your method implementation here */
+
+        /* ============================================ */`;
 
         return templateString.replace('{{USER_CODE}}', codeContent);
     }
@@ -476,6 +482,10 @@ class AssessmentEngine {
      * Extract only the user's code from the complete template
      */
     extractUserCode(fullTemplate, question) {
+        console.log('=== extractUserCode Debug ===');
+        console.log('Input template length:', fullTemplate.length);
+        console.log('First 200 chars:', fullTemplate.substring(0, 200));
+
         if (!question.template) {
             return fullTemplate;
         }
@@ -488,27 +498,106 @@ class AssessmentEngine {
             templateString = question.template;
         }
 
-        // Find the {{USER_CODE}} position in the template
-        const userCodeIndex = templateString.indexOf('{{USER_CODE}}');
-        if (userCodeIndex === -1) {
+        // Check if user wrote just the method body (no class/import statements)
+        if (!fullTemplate.includes('public class') && !fullTemplate.includes('import ')) {
+            console.log('Detected method body only, returning as-is');
             return fullTemplate;
         }
 
-        // Calculate the lines before and after the user code
-        const beforeLines = templateString.substring(0, userCodeIndex).split('\n');
-        const afterLines = templateString.substring(userCodeIndex + '{{USER_CODE}}'.length).split('\n');
+        // Look for method signature patterns - be more specific to avoid main method
+        const methodPatterns = [
+            /\)\s*throws\s+IOException\s*\{/g,  // throws IOException pattern (most specific)
+            /\)\s*throws.*?Exception\s*\{/g,    // throws any Exception pattern
+            /public\s+(?:int|List<String>|String|void)\s+(?!main)\w+.*?\{/g  // public method but NOT main
+        ];
 
-        // Extract the user code from the full template
-        const fullLines = fullTemplate.split('\n');
-        const userStartLine = beforeLines.length - 1;
-        const userEndLine = fullLines.length - afterLines.length;
+        let methodStart = -1;
+        let methodStartPattern = '';
 
-        if (userStartLine >= 0 && userEndLine > userStartLine) {
-            const userLines = fullLines.slice(userStartLine, userEndLine);
-            // Remove leading whitespace but preserve relative indentation
-            return userLines.map(line => line.replace(/^        /, '')).join('\n').trim();
+        // Try to find any method signature pattern, preferring target methods over main
+        for (const pattern of methodPatterns) {
+            const matches = [...fullTemplate.matchAll(pattern)];
+            if (matches.length > 0) {
+                // For throws patterns, use the first match (target method)
+                // For public method patterns, use the first non-main method
+                const targetMatch = matches[0];  // Changed from last to first
+                methodStart = targetMatch.index + targetMatch[0].length;
+                methodStartPattern = targetMatch[0];
+                console.log('Found method pattern:', methodStartPattern);
+                break;
+            }
         }
 
+        if (methodStart === -1) {
+            console.log('No method signature found, trying comment extraction');
+            // Try to extract based on comment markers
+            const commentStart = fullTemplate.indexOf('/* Write your code here */');
+            const userCodeStart = fullTemplate.indexOf('{{USER_CODE}}');
+
+            if (commentStart !== -1 || userCodeStart !== -1) {
+                const markerPos = commentStart !== -1 ? commentStart : userCodeStart;
+                const beforeMarker = fullTemplate.substring(0, markerPos);
+                const afterMarker = fullTemplate.substring(markerPos);
+
+                // Look for the opening brace of the method
+                const lastBraceIndex = beforeMarker.lastIndexOf('{');
+                if (lastBraceIndex !== -1) {
+                    const afterBrace = fullTemplate.substring(lastBraceIndex + 1);
+                    const nextMethodBrace = afterBrace.indexOf('\n    }');
+                    if (nextMethodBrace !== -1) {
+                        let methodBody = afterBrace.substring(0, nextMethodBrace).trim();
+                        // Clean up placeholders
+                        methodBody = methodBody.replace('/* Write your code here */', '').trim();
+                        methodBody = methodBody.replace('{{USER_CODE}}', '').trim();
+                        console.log('Extracted via comment markers:', methodBody.length, 'chars');
+                        return methodBody;
+                    }
+                }
+            }
+
+            console.log('Fallback: returning full template');
+            return fullTemplate;
+        }
+
+        // Find the method body end using brace matching
+        let braceCount = 0;
+        let methodBodyEnd = -1;
+
+        for (let i = methodStart; i < fullTemplate.length; i++) {
+            if (fullTemplate[i] === '{') braceCount++;
+            else if (fullTemplate[i] === '}') {
+                braceCount--;
+                if (braceCount === -1) {
+                    methodBodyEnd = i;
+                    break;
+                }
+            }
+        }
+
+        if (methodBodyEnd !== -1) {
+            let methodBody = fullTemplate.substring(methodStart, methodBodyEnd).trim();
+            console.log('Raw method body:', methodBody.length, 'chars');
+
+            // Remove placeholders
+            methodBody = methodBody.replace(/\/\*\s*Write your code here\s*\*\//, '').trim();
+            methodBody = methodBody.replace('{{USER_CODE}}', '').trim();
+            methodBody = methodBody.replace(/\/\*[^*]*\*+([^/*][^*]*\*+)*\//, '').trim(); // Remove all comments
+
+            // Clean up indentation - remove leading whitespace from each line
+            const lines = methodBody.split('\n');
+            const cleanedLines = lines.map(line => {
+                // Remove up to 8 spaces of indentation (method body indentation)
+                return line.replace(/^        /, '');
+            });
+
+            const result = cleanedLines.join('\n').trim();
+            console.log('Final extracted code:', result.length, 'chars');
+            console.log('Extracted content:', result.substring(0, 150) + (result.length > 150 ? '...' : ''));
+
+            return result;
+        }
+
+        console.log('No extraction possible, returning full template');
         return fullTemplate;
     }
 

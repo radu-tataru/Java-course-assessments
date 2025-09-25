@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Code Extraction</title>
+</head>
+<body>
+    <h1>Testing Code Extraction Logic</h1>
+    <div id="results"></div>
+
+    <script>
+        // Copy the extractUserCode logic from assessment-engine.js
+        function extractUserCode(fullTemplate, question) {
+            if (!question.template) {
+                return fullTemplate;
+            }
+
+            // Handle both array and string templates
+            let templateString;
+            if (Array.isArray(question.template)) {
+                templateString = question.template.join('\n');
+            } else {
+                templateString = question.template;
+            }
+
+            // Smart extraction: look for method boundaries
+            const methodStart = 'throws IOException {';
+            const methodEnd = '    }';
+
+            const startIndex = fullTemplate.indexOf(methodStart);
+            if (startIndex === -1) {
+                // If no method signature found, student might have written just the method body
+                // Check if it looks like method body code (doesn't contain class/import statements)
+                if (!fullTemplate.includes('public class') && !fullTemplate.includes('import ')) {
+                    return fullTemplate;
+                }
+
+                // Otherwise extract everything between the comment markers
+                const commentStart = fullTemplate.indexOf('/* Write your code here */');
+                if (commentStart !== -1) {
+                    // Find the method body bounds around the comment
+                    const beforeComment = fullTemplate.substring(0, commentStart);
+                    const afterComment = fullTemplate.substring(commentStart);
+
+                    // Look for the opening brace of the method
+                    const lastBraceIndex = beforeComment.lastIndexOf('{');
+                    if (lastBraceIndex !== -1) {
+                        const afterBrace = fullTemplate.substring(lastBraceIndex + 1);
+                        const nextMethodBrace = afterBrace.indexOf('\n    }');
+                        if (nextMethodBrace !== -1) {
+                            const methodBody = afterBrace.substring(0, nextMethodBrace).trim();
+                            // Remove the comment placeholder if still there
+                            return methodBody.replace('/* Write your code here */', '').trim();
+                        }
+                    }
+                }
+
+                return fullTemplate;
+            }
+
+            // Find the actual method body content
+            const methodBodyStart = startIndex + methodStart.length;
+            let braceCount = 0;
+            let methodBodyEnd = -1;
+
+            for (let i = methodBodyStart; i < fullTemplate.length; i++) {
+                if (fullTemplate[i] === '{') braceCount++;
+                else if (fullTemplate[i] === '}') {
+                    braceCount--;
+                    if (braceCount === -1) {
+                        methodBodyEnd = i;
+                        break;
+                    }
+                }
+            }
+
+            if (methodBodyEnd !== -1) {
+                let methodBody = fullTemplate.substring(methodBodyStart, methodBodyEnd).trim();
+
+                // Remove the comment placeholder if still there
+                methodBody = methodBody.replace(/\/\*\s*Write your code here\s*\*\//, '').trim();
+
+                // Clean up indentation - remove leading whitespace from each line
+                const lines = methodBody.split('\n');
+                const cleanedLines = lines.map(line => {
+                    // Remove up to 8 spaces of indentation
+                    return line.replace(/^        /, '');
+                });
+
+                return cleanedLines.join('\n').trim();
+            }
+
+            return fullTemplate;
+        }
+
+        // Test scenarios
+        const tests = [
+            {
+                name: "Full template with user code",
+                fullTemplate: `import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+
+public class Main {
+    public int countLinesWithWord(String filePath, String searchWord) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            int count = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.toLowerCase().contains(searchWord.toLowerCase())) {
+                    count++;
+                }
+            }
+            return count;
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            return 0;
+        }
+    }
+}`,
+                question: {
+                    template: [
+                        "import java.io.*;",
+                        "import java.nio.file.*;",
+                        "import java.util.*;",
+                        "",
+                        "public class Main {",
+                        "    public int countLinesWithWord(String filePath, String searchWord) throws IOException {",
+                        "        {{USER_CODE}}",
+                        "    }",
+                        "}"
+                    ]
+                },
+                expected: `try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+    int count = 0;
+    String line;
+    while ((line = reader.readLine()) != null) {
+        if (line.toLowerCase().contains(searchWord.toLowerCase())) {
+            count++;
+        }
+    }
+    return count;
+} catch (IOException e) {
+    System.err.println("Error: " + e.getMessage());
+    return 0;
+}`
+            },
+            {
+                name: "Just method body",
+                fullTemplate: `try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+    int count = 0;
+    String line;
+    while ((line = reader.readLine()) != null) {
+        if (line.toLowerCase().contains(searchWord.toLowerCase())) {
+            count++;
+        }
+    }
+    return count;
+}`,
+                question: {
+                    template: ["some template"]
+                },
+                expected: `try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+    int count = 0;
+    String line;
+    while ((line = reader.readLine()) != null) {
+        if (line.toLowerCase().contains(searchWord.toLowerCase())) {
+            count++;
+        }
+    }
+    return count;
+}`
+            }
+        ];
+
+        // Run tests
+        let resultsHTML = '';
+        tests.forEach((test, index) => {
+            const result = extractUserCode(test.fullTemplate, test.question);
+            const passed = result.trim() === test.expected.trim();
+
+            resultsHTML += `
+                <div style="margin: 20px; padding: 15px; border: 1px solid ${passed ? 'green' : 'red'}; border-radius: 5px;">
+                    <h3>Test ${index + 1}: ${test.name} - ${passed ? 'PASSED' : 'FAILED'}</h3>
+                    <h4>Input (${test.fullTemplate.length} chars):</h4>
+                    <pre style="background: #f0f0f0; padding: 10px; border-radius: 3px;">${test.fullTemplate}</pre>
+                    <h4>Expected:</h4>
+                    <pre style="background: #e8f5e8; padding: 10px; border-radius: 3px;">${test.expected}</pre>
+                    <h4>Actual Result:</h4>
+                    <pre style="background: ${passed ? '#e8f5e8' : '#ffe8e8'}; padding: 10px; border-radius: 3px;">${result}</pre>
+                </div>
+            `;
+        });
+
+        document.getElementById('results').innerHTML = resultsHTML;
+    </script>
+</body>
+</html>
