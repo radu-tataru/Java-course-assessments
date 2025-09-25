@@ -36,19 +36,6 @@ export default async function handler(req, res) {
                 });
             }
 
-            console.log('Submitting code to Judge0...');
-            console.log('Source code length:', source_code.length);
-            console.log('First 200 chars of source code:', source_code.substring(0, 200));
-            console.log('Full source code for debugging:', source_code);
-
-            // Check for invisible characters
-            const encoded = Buffer.from(source_code).toString('base64');
-            console.log('Base64 encoded:', encoded);
-            console.log('Base64 decoded back:', Buffer.from(encoded, 'base64').toString());
-
-            // Check if decoding matches original
-            const backDecoded = Buffer.from(encoded, 'base64').toString();
-            console.log('Round trip successful:', backDecoded === source_code);
 
             const submissionBody = {
                 source_code: source_code, // Send plain text instead of Base64
@@ -59,23 +46,18 @@ export default async function handler(req, res) {
                 wall_time_limit: 15
             };
 
-            console.log('Full submission payload:', JSON.stringify(submissionBody, null, 2));
 
             // First, let's check available languages
-            console.log('Checking available languages...');
             try {
                 const langResponse = await fetch('https://ce.judge0.com/languages');
                 if (langResponse.ok) {
                     const languages = await langResponse.json();
-                    console.log('Available languages:', languages.filter(l => l.name.toLowerCase().includes('java')));
                 }
             } catch (langError) {
-                console.log('Language check error:', langError.message);
             }
 
             // If language_id is not Java (62), respect the original language
             if (submissionBody.language_id !== 62 && submissionBody.language_id) {
-                console.log(`Using specified language ID ${submissionBody.language_id} with base64_encoded: ${submissionBody.base64_encoded}...`);
 
                 try {
                     const directResponse = await fetch('https://ce.judge0.com/submissions', {
@@ -87,15 +69,11 @@ export default async function handler(req, res) {
                     });
 
                     if (directResponse.ok) {
-                        console.log(`Direct Judge0 endpoint succeeded with language ID ${submissionBody.language_id}!`);
                         const directData = await directResponse.json();
-                        console.log('Direct response:', directData);
                         return res.json(directData);
                     } else {
-                        console.log(`Direct Judge0 failed with language ID ${submissionBody.language_id}:`, directResponse.status, await directResponse.text());
                     }
                 } catch (directError) {
-                    console.log(`Direct Judge0 error with language ID ${submissionBody.language_id}:`, directError.message);
                 }
             }
 
@@ -103,7 +81,6 @@ export default async function handler(req, res) {
             const javaLanguageIds = [62, 91, 10];
 
             for (const langId of javaLanguageIds) {
-                console.log(`Testing with Java language ID ${langId}...`);
                 const testBody = { ...submissionBody, language_id: langId };
 
                 try {
@@ -116,20 +93,15 @@ export default async function handler(req, res) {
                     });
 
                     if (directResponse.ok) {
-                        console.log(`Direct Judge0 endpoint succeeded with language ID ${langId}!`);
                         const directData = await directResponse.json();
-                        console.log('Direct response:', directData);
                         return res.json(directData);
                     } else {
-                        console.log(`Direct Judge0 failed with language ID ${langId}:`, directResponse.status, await directResponse.text());
                     }
                 } catch (directError) {
-                    console.log(`Direct Judge0 error with language ID ${langId}:`, directError.message);
                 }
             }
 
             // Fallback to RapidAPI
-            console.log('Trying RapidAPI endpoint...');
             const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions', {
                 method: 'POST',
                 headers: {
@@ -150,7 +122,6 @@ export default async function handler(req, res) {
             }
 
             const data = await response.json();
-            console.log('Code submitted, token:', data.token);
             return res.json(data);
 
         } else if (req.method === 'GET') {
@@ -163,7 +134,6 @@ export default async function handler(req, res) {
                 });
             }
 
-            console.log('Getting result for token:', token);
 
             const response = await fetch(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
                 headers: {
@@ -182,7 +152,6 @@ export default async function handler(req, res) {
             }
 
             const data = await response.json();
-            console.log('Result retrieved, status:', data.status?.description || 'unknown');
             return res.json(data);
         }
 

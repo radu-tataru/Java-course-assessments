@@ -454,12 +454,6 @@ class AssessmentEngine {
             }
 
             // Execute the code
-            console.log('=== Assessment Engine executing code ===');
-            console.log('Passing userCode to Judge0:', {
-                userCodeLength: userCode.length,
-                userCodePreview: userCode.substring(0, 100) + (userCode.length > 100 ? '...' : ''),
-                questionId: question.id
-            });
             const result = await this.judge0.executeAssessmentCode(question, userCode);
             this.showExecutionResult(result.feedback || 'Code executed', result.success, result);
 
@@ -522,9 +516,6 @@ class AssessmentEngine {
      * Extract only the user's code from the complete template
      */
     extractUserCode(fullTemplate, question) {
-        console.log('=== extractUserCode Debug ===');
-        console.log('Input template length:', fullTemplate.length);
-        console.log('First 200 chars:', fullTemplate.substring(0, 200));
 
         if (!question.template) {
             return fullTemplate;
@@ -540,7 +531,6 @@ class AssessmentEngine {
 
         // Check if user wrote just the method body (no class/import statements)
         if (!fullTemplate.includes('public class') && !fullTemplate.includes('import ')) {
-            console.log('Detected method body only, returning as-is');
             return fullTemplate;
         }
 
@@ -563,13 +553,11 @@ class AssessmentEngine {
                 const targetMatch = matches[0];  // Changed from last to first
                 methodStart = targetMatch.index + targetMatch[0].length;
                 methodStartPattern = targetMatch[0];
-                console.log('Found method pattern:', methodStartPattern);
                 break;
             }
         }
 
         if (methodStart === -1) {
-            console.log('No method signature found, trying comment extraction');
             // Try to extract based on comment markers
             const commentStart = fullTemplate.indexOf('/* Write your code here */');
             const userCodeStart = fullTemplate.indexOf('{{USER_CODE}}');
@@ -589,13 +577,11 @@ class AssessmentEngine {
                         // Clean up placeholders
                         methodBody = methodBody.replace('/* Write your code here */', '').trim();
                         methodBody = methodBody.replace('{{USER_CODE}}', '').trim();
-                        console.log('Extracted via comment markers:', methodBody.length, 'chars');
                         return methodBody;
                     }
                 }
             }
 
-            console.log('Fallback: returning full template');
             return fullTemplate;
         }
 
@@ -616,7 +602,6 @@ class AssessmentEngine {
 
         if (methodBodyEnd !== -1) {
             let methodBody = fullTemplate.substring(methodStart, methodBodyEnd).trim();
-            console.log('Raw method body:', methodBody.length, 'chars');
 
             // Remove placeholders
             methodBody = methodBody.replace(/\/\*\s*Write your code here\s*\*\//, '').trim();
@@ -626,13 +611,11 @@ class AssessmentEngine {
             // Special case: If method body still contains class structure,
             // it means student submitted full template - extract the actual implementation
             if (methodBody.includes('public class') || methodBody.includes('import ')) {
-                console.log('Method body contains full template structure, extracting actual user code...');
 
                 // Find the innermost method with the same signature
                 const innerMethodMatch = methodBody.match(/public\s+int\s+countLinesWithWord[^{]*\{([^}]*)\}/);
                 if (innerMethodMatch) {
                     const innerCode = innerMethodMatch[1].trim();
-                    console.log('Found inner method implementation:', innerCode.length, 'chars');
                     if (innerCode && innerCode !== '' && !innerCode.includes('{{USER_CODE}}')) {
                         return innerCode;
                     }
@@ -641,7 +624,6 @@ class AssessmentEngine {
                 // Alternative: Look for specific patterns in user's actual implementation
                 const simpleReturnMatch = methodBody.match(/return\s+\d+\s*;/);
                 if (simpleReturnMatch) {
-                    console.log('Found simple return statement:', simpleReturnMatch[0]);
                     return simpleReturnMatch[0].trim();
                 }
             }
@@ -654,13 +636,10 @@ class AssessmentEngine {
             });
 
             const result = cleanedLines.join('\n').trim();
-            console.log('Final extracted code:', result.length, 'chars');
-            console.log('Extracted content:', result.substring(0, 150) + (result.length > 150 ? '...' : ''));
 
             return result;
         }
 
-        console.log('No extraction possible, returning full template');
         return fullTemplate;
     }
 

@@ -268,10 +268,8 @@
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
                     // Page is hidden, could pause timer or show warning
-                    console.log('Assessment tab is not active');
                 } else {
                     // Page is visible again
-                    console.log('Assessment tab is active');
                 }
             });
 
@@ -452,14 +450,12 @@
                 const elapsedSeconds = Math.floor((Date.now() - assessmentStartTime) / 1000);
                 timeRemaining = Math.max(0, totalTimeLimit - elapsedSeconds);
 
-                console.log(`Resuming timer: ${Math.floor(elapsedSeconds/60)} minutes elapsed, ${Math.floor(timeRemaining/60)} minutes remaining`);
             } else {
                 // Starting fresh: save start time and time limit
                 assessmentStartTime = Date.now();
                 localStorage.setItem('assessment_start_time', assessmentStartTime.toString());
                 localStorage.setItem('assessment_time_limit', timeRemaining.toString());
 
-                console.log(`Starting new timer: ${Math.floor(timeRemaining/60)} minutes`);
             }
 
             // If time is already up, handle it

@@ -353,7 +353,6 @@ class Judge0Integration {
         if (questionData.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE) {
             // Check if user code is already a complete template (extraction failed)
             if (fixedCode.includes('public class') || fixedCode.includes('import ')) {
-                console.log('WARNING: User code contains full template - extraction may have failed');
                 // Don't add more indentation to already complete code
                 return fixedCode;
             }
@@ -388,14 +387,6 @@ class Judge0Integration {
             const openBraces = (fixedCode.match(/\{/g) || []).length;
             const closeBraces = (fixedCode.match(/\}/g) || []).length;
 
-            console.log('Code validation:', {
-                originalLines: lines.length,
-                fixedLines: fixedLines.length,
-                openBraces: openBraces,
-                closeBraces: closeBraces,
-                braceBalance: openBraces - closeBraces,
-                fixedCodePreview: fixedCode.substring(0, 200) + '...'
-            });
         }
 
         return fixedCode;
@@ -444,11 +435,9 @@ class Judge0Integration {
      * Test Judge0 with Python to verify service is working
      */
     async testWithPython() {
-        console.log('Testing Judge0 with Python...');
 
         // Test 1: Direct to ce.judge0.com with plain text
         try {
-            console.log('Testing direct Judge0 with plain text Python...');
             const pythonCode = 'print("Hello from Python")';
             const directResponse = await fetch('https://ce.judge0.com/submissions', {
                 method: 'POST',
@@ -464,7 +453,6 @@ class Judge0Integration {
 
             if (directResponse.ok) {
                 const directData = await directResponse.json();
-                console.log('Direct Python test successful:', directData);
 
                 // Check result after delay
                 setTimeout(async () => {
@@ -472,17 +460,13 @@ class Judge0Integration {
                         const resultResponse = await fetch(`https://ce.judge0.com/submissions/${directData.token}`);
                         if (resultResponse.ok) {
                             const result = await resultResponse.json();
-                            console.log('Direct Python result:', result);
                         }
                     } catch (e) {
-                        console.log('Direct Python result check failed:', e);
                     }
                 }, 3000);
             } else {
-                console.log('Direct Python test failed:', await directResponse.text());
             }
         } catch (error) {
-            console.log('Direct Python test error:', error);
         }
 
         // Test 2: Via our backend (existing test)
@@ -502,7 +486,6 @@ class Judge0Integration {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Python test submission successful:', data);
 
                 // Check result after a delay
                 setTimeout(async () => {
@@ -510,17 +493,13 @@ class Judge0Integration {
                         const resultResponse = await fetch(`${this.backendUrl}/api/submissions?token=${data.token}`);
                         if (resultResponse.ok) {
                             const result = await resultResponse.json();
-                            console.log('Python test result:', result);
                         }
                     } catch (e) {
-                        console.log('Python result check failed:', e);
                     }
                 }, 2000);
             } else {
-                console.log('Python test failed:', await response.text());
             }
         } catch (error) {
-            console.log('Python test error:', error);
         }
     }
 
@@ -584,7 +563,6 @@ class AssessmentJudge0 extends Judge0Integration {
     }
 
     prepareExecutableCode(questionData, userCode) {
-        console.log('prepareExecutableCode called with:', {
             questionType: questionData.type,
             hasTemplate: !!questionData.template,
             userCodeLength: userCode.length,
@@ -611,7 +589,6 @@ class AssessmentJudge0 extends Judge0Integration {
                     const validatedUserCode = this.validateAndFixUserCode(cleanUserCode, questionData);
                     const preparedCode = templateString.replace('{{USER_CODE}}', validatedUserCode);
 
-                    console.log('Template replacement:', {
                         templateType: Array.isArray(questionData.template) ? 'array' : 'string',
                         templateLength: templateString.length,
                         originalUserCode: cleanUserCode,
