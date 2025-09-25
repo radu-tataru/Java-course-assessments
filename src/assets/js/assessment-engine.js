@@ -1107,14 +1107,14 @@ class AssessmentEngine {
      * Format answer for review display
      */
     formatAnswerForReview(question, answer) {
-        // Debug logging for Question 1 to see what's happening
-        if (question.id === 'step1-q1') {
-            console.log('DEBUG - Question 1 formatAnswerForReview:', {
+        // Debug logging for Questions 1 and 5 to see what's happening
+        if (question.id === 'step1-q1' || question.id === 'step1-q5') {
+            console.log(`DEBUG - ${question.id} formatAnswerForReview:`, {
                 questionId: question.id,
                 questionType: question.type,
                 answer: answer,
                 answerType: typeof answer,
-                answers: question.answers,
+                answers: question.answers.map((a, i) => `${i}: ${a.text}`),
                 expectedText: question.answers[answer]?.text
             });
         }
