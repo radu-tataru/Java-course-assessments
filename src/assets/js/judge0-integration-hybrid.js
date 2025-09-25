@@ -351,6 +351,13 @@ class Judge0Integration {
 
         // Fix common indentation issues for method bodies
         if (questionData.type === CONFIG.QUESTION_TYPES.CODING_CHALLENGE) {
+            // Check if user code is already a complete template (extraction failed)
+            if (fixedCode.includes('public class') || fixedCode.includes('import ')) {
+                console.log('WARNING: User code contains full template - extraction may have failed');
+                // Don't add more indentation to already complete code
+                return fixedCode;
+            }
+
             // First, normalize all line endings and remove extra whitespace
             fixedCode = fixedCode.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
@@ -597,16 +604,6 @@ class AssessmentJudge0 extends Judge0Integration {
                         templateString = questionData.template;
                     }
 
-                    // For debugging: try different approaches
-                    if (cleanUserCode.trim() === 'return 2;') {
-                        // Test with Python instead of Java to verify Judge0 is working
-                        this.testWithPython();
-
-                        // Still try Java but with different formatting
-                        const testCode = `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello");\n    }\n}`;
-                        console.log('Using formatted debug test code:', testCode);
-                        return testCode;
-                    }
 
                     // Validate and fix common user code issues
                     const validatedUserCode = this.validateAndFixUserCode(cleanUserCode, questionData);
