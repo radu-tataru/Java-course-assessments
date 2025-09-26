@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin Account - Java Course Assessment System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #dc3545, #6c757d);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .admin-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            margin: 2rem;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #dc3545, #6c757d);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .form-control {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.1);
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, #dc3545, #6c757d);
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            width: 100%;
+            color: white;
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+            opacity: 0.9;
+            color: white;
+        }
+
+        .alert-custom {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="admin-logo">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+            <h3 class="fw-bold text-dark">Create Admin Account</h3>
+            <p class="text-muted">Initialize the first admin user for the system</p>
+        </div>
+
+        <div class="warning-box">
+            <div class="d-flex align-items-start">
+                <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                <div>
+                    <strong>Security Notice:</strong> This page should only be used once to create the initial admin account. After creating the admin, consider removing or disabling this endpoint for security.
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Creation Form -->
+        <form id="adminForm">
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" name="firstName"
+                       placeholder="Enter admin first name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" name="lastName"
+                       placeholder="Enter admin last name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email"
+                       placeholder="admin@example.com" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password"
+                       placeholder="Enter secure password (min 6 characters)" required>
+                <div class="form-text">Password must be at least 6 characters long</div>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-admin">
+                    <i class="bi bi-shield-plus me-2"></i>
+                    Create Admin Account
+                </button>
+            </div>
+        </form>
+
+        <!-- Status Messages -->
+        <div id="adminMessages"></div>
+
+        <div class="text-center mt-3">
+            <a href="index.html" class="text-muted text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i>Back to Login
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Handle admin creation form submission
+        document.getElementById('adminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const messagesDiv = document.getElementById('adminMessages');
+
+            // Show loading state
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Creating Admin...';
+            submitBtn.disabled = true;
+
+            // Clear previous messages
+            messagesDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/create-admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        firstName: formData.get('firstName'),
+                        lastName: formData.get('lastName'),
+                        email: formData.get('email'),
+                        password: formData.get('password')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show success message
+                    messagesDiv.innerHTML = `
+                        <div class="alert alert-success alert-custom">
+                            <i class="bi bi-check-circle me-2"></i>
+                            <strong>Admin account created successfully!</strong><br>
+                            Email: ${data.admin.email}<br>
+                            Role: ${data.admin.role}<br>
+                            <small class="text-muted">You can now login with these credentials.</small>
+                        </div>
+                    `;
+
+                    // Reset form
+                    form.reset();
+
+                    // Redirect to login after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+
+                } else {
+                    // Show error message
+                    messagesDiv.innerHTML = `
+                        <div class="alert alert-danger alert-custom">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            ${data.error || 'Failed to create admin account. Please try again.'}
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Create admin error:', error);
+                messagesDiv.innerHTML = `
+                    <div class="alert alert-danger alert-custom">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Network error. Please check your connection and try again.
+                    </div>
+                `;
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

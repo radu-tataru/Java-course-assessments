@@ -26,6 +26,9 @@
     },
     "api/progress.js": {
       "maxDuration": 30
+    },
+    "api/create-admin.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
