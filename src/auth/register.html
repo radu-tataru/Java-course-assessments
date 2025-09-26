@@ -206,11 +206,6 @@
 
                 <hr class="my-4">
 
-                <div class="text-center">
-                    <a href="../../index.html" class="text-muted text-decoration-none">
-                        <i class="bi bi-arrow-left me-1"></i>Back to Home
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -408,11 +403,8 @@
             redirectToDashboard() {
                 const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
 
-                if (userData.role === 'teacher') {
-                    window.location.href = '../teacher-dashboard/dashboard.html';
-                } else {
-                    window.location.href = '../assessments/step1-assessment.html';
-                }
+                // Always redirect to home page after successful registration
+                window.location.href = '../../home.html';
             }
 
             showAlert(message, type = 'info') {
