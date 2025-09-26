@@ -294,27 +294,27 @@
 
         function startNewAssessment() {
             // Load the assessment page in the parent frame
-            parent.loadContent('../assessments/step1-assessment.html');
+            parent.loadContent('src/assessments/step1-assessment.html');
         }
 
         function continueAssessment(attemptId) {
             // Continue an in-progress assessment
-            parent.loadContent(`../assessments/step1-assessment.html?attempt=${attemptId}`);
+            parent.loadContent(`src/assessments/step1-assessment.html?attempt=${attemptId}`);
         }
 
         function viewAttempt(attemptId) {
             // View attempt details
-            parent.loadContent(`../assessments/attempt-details.html?id=${attemptId}`);
+            parent.loadContent(`src/assessments/attempt-details.html?id=${attemptId}`);
         }
 
         function viewResults(attemptId) {
             // View assessment results
-            parent.loadContent(`../assessments/attempt-results.html?id=${attemptId}`);
+            parent.loadContent(`src/assessments/attempt-results.html?id=${attemptId}`);
         }
 
         function retakeAssessment(step) {
             // Start a new attempt for the same assessment
-            parent.loadContent(`../assessments/step${step}-assessment.html`);
+            parent.loadContent(`src/assessments/step${step}-assessment.html`);
         }
 
         function showError(message) {

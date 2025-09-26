@@ -412,15 +412,15 @@
         }
 
         function startAssessment(step) {
-            parent.loadContent(`../assessments/step${step}-assessment.html`);
+            parent.loadContent(`src/assessments/step${step}-assessment.html`);
         }
 
         function continueAssessment(attemptId) {
-            parent.loadContent(`../assessments/step1-assessment.html?attempt=${attemptId}`);
+            parent.loadContent(`src/assessments/step1-assessment.html?attempt=${attemptId}`);
         }
 
         function retakeAssessment(step) {
-            parent.loadContent(`../assessments/step${step}-assessment.html`);
+            parent.loadContent(`src/assessments/step${step}-assessment.html`);
         }
 
         function exportProgress() {

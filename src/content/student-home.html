@@ -166,7 +166,7 @@
     <script>
         function startAssessment(stepNumber) {
             // Load the assessment in the parent frame
-            parent.loadContent('../assessments/step1-assessment.html');
+            parent.loadContent(`src/assessments/step${stepNumber}-assessment.html`);
         }
 
         // Load student stats on page load
