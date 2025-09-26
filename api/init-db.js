@@ -119,6 +119,7 @@ module.exports = async function handler(req, res) {
             SELECT * FROM assessments WHERE step_number = 1
         `;
 
+        let assessment;
         if (existingAssessment.rows.length === 0) {
             // Create Step 1 assessment
             const assessmentResult = await sql`
@@ -127,10 +128,29 @@ module.exports = async function handler(req, res) {
                 RETURNING *
             `;
 
-            const assessment = assessmentResult.rows[0];
+            assessment = assessmentResult.rows[0];
+        } else {
+            // Use existing assessment but update questions
+            assessment = existingAssessment.rows[0];
 
-            // Insert sample questions (simplified for initial testing)
-            const questions = [
+            // Delete existing questions for this assessment
+            await sql`
+                DELETE FROM questions WHERE assessment_id = ${assessment.id}
+            `;
+
+            // Update assessment with correct question count
+            await sql`
+                UPDATE assessments
+                SET total_questions = 10,
+                    passing_score = 70.00
+                WHERE id = ${assessment.id}
+            `;
+
+            console.log(`Updating existing Step 1 assessment with new questions`);
+        }
+
+        // Insert comprehensive questions for Step 1 assessment
+        const questions = [
                 {
                     type: 'multiple_choice',
                     question: 'Which Java class is most suitable for reading text files line by line?',
@@ -147,20 +167,87 @@ module.exports = async function handler(req, res) {
                     explanation: 'True. Try-with-resources automatically calls close() on resources that implement AutoCloseable, even if an exception is thrown.',
                     difficulty: 'easy',
                     points: 5
+                },
+                {
+                    type: 'multiple_choice',
+                    question: 'What exception should you catch when reading files that might not exist?',
+                    options: ['IOException', 'FileNotFoundException', 'RuntimeException', 'Exception'],
+                    correct_answer: 'FileNotFoundException',
+                    explanation: 'FileNotFoundException is thrown when trying to open a file that doesn\'t exist. It\'s a subclass of IOException.',
+                    difficulty: 'easy',
+                    points: 10
+                },
+                {
+                    type: 'multiple_choice',
+                    question: 'Which method is used to check if there are more lines to read in a BufferedReader?',
+                    options: ['hasNext()', 'ready()', 'readLine() != null', 'available()'],
+                    correct_answer: 'readLine() != null',
+                    explanation: 'You check if readLine() returns null to determine if you\'ve reached the end of the file.',
+                    difficulty: 'medium',
+                    points: 15
+                },
+                {
+                    type: 'true_false',
+                    question: 'FileReader automatically handles character encoding conversion.',
+                    correct_answer: 'true',
+                    explanation: 'True. FileReader converts bytes to characters using the default character encoding of the platform.',
+                    difficulty: 'medium',
+                    points: 10
+                },
+                {
+                    type: 'multiple_choice',
+                    question: 'What is the correct way to create a BufferedReader for reading a text file?',
+                    options: ['new BufferedReader("file.txt")', 'new BufferedReader(new FileReader("file.txt"))', 'new BufferedReader(new File("file.txt"))', 'BufferedReader.create("file.txt")'],
+                    correct_answer: 'new BufferedReader(new FileReader("file.txt"))',
+                    explanation: 'BufferedReader wraps another Reader, typically FileReader for reading text files.',
+                    difficulty: 'medium',
+                    points: 15
+                },
+                {
+                    type: 'code_completion',
+                    question: 'Complete the code to read all lines from a file and print them:\n\n```java\ntry (BufferedReader br = new BufferedReader(new FileReader("data.txt"))) {\n    String line;\n    while ((line = ______) != null) {\n        System.out.println(line);\n    }\n}\n```',
+                    correct_answer: 'br.readLine()',
+                    explanation: 'The readLine() method reads a line of text and returns null when the end of file is reached.',
+                    difficulty: 'medium',
+                    points: 20
+                },
+                {
+                    type: 'multiple_choice',
+                    question: 'Which of the following is NOT a valid way to handle file reading exceptions?',
+                    options: ['try-catch block', 'throws declaration', 'try-with-resources', 'ignore them'],
+                    correct_answer: 'ignore them',
+                    explanation: 'File I/O exceptions must be handled either with try-catch or declared with throws. Ignoring them will cause compilation errors.',
+                    difficulty: 'easy',
+                    points: 10
+                },
+                {
+                    type: 'true_false',
+                    question: 'Scanner class can be used to read files and automatically parse different data types.',
+                    correct_answer: 'true',
+                    explanation: 'True. Scanner can read from files and provides methods like nextInt(), nextDouble(), etc. for parsing different data types.',
+                    difficulty: 'medium',
+                    points: 10
+                },
+                {
+                    type: 'coding_challenge',
+                    question: 'Write a method that reads a text file and returns the number of lines in the file. Handle any potential exceptions appropriately.',
+                    correct_answer: 'public static int countLines(String filename) throws IOException {\n    try (BufferedReader br = new BufferedReader(new FileReader(filename))) {\n        int count = 0;\n        while (br.readLine() != null) {\n            count++;\n        }\n        return count;\n    }\n}',
+                    explanation: 'This method uses try-with-resources to automatically close the BufferedReader and counts lines by reading until readLine() returns null.',
+                    difficulty: 'hard',
+                    points: 25
                 }
-            ];
+        ];
 
-            // Insert questions
-            for (let i = 0; i < questions.length; i++) {
-                const q = questions[i];
-                await sql`
-                    INSERT INTO questions (assessment_id, question_type, question_text, options, correct_answer, explanation, points, difficulty, order_index)
-                    VALUES (${assessment.id}, ${q.type}, ${q.question}, ${JSON.stringify(q.options || null)}, ${q.correct_answer}, ${q.explanation}, ${q.points}, ${q.difficulty}, ${i + 1})
-                `;
-            }
-
-            console.log(`Created Step 1 assessment with ${questions.length} questions`);
+        // Insert questions
+        for (let i = 0; i < questions.length; i++) {
+            const q = questions[i];
+            await sql`
+                INSERT INTO questions (assessment_id, question_type, question_text, options, correct_answer, explanation, points, difficulty, order_index)
+                VALUES (${assessment.id}, ${q.type}, ${q.question}, ${JSON.stringify(q.options || null)}, ${q.correct_answer}, ${q.explanation}, ${q.points}, ${q.difficulty}, ${i + 1})
+            `;
         }
+
+        console.log(`Step 1 assessment updated with ${questions.length} questions`);
 
         return res.status(200).json({
             success: true,

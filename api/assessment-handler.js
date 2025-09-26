@@ -305,7 +305,7 @@ async function handleStartAssessment(req, res, user) {
         question_type: q.question_type,
         question_text: q.question_text,
         code_snippet: q.code_snippet,
-        options: q.options,
+        options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
         points: q.points,
         difficulty: q.difficulty,
         order_index: q.order_index

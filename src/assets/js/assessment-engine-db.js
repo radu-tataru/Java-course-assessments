@@ -206,19 +206,23 @@ class DatabaseAssessmentEngine {
                 </div>
 
                 <div class="question-options">
-                    ${options.map((option, index) => `
+                    ${options.map((option, index) => {
+                        // Handle both string and object formats for options
+                        const optionText = typeof option === 'string' ? option : option.text;
+                        return `
                         <div class="form-check mb-3">
                             <input class="form-check-input"
                                    type="radio"
                                    name="question_${question.id}"
                                    id="option_${index}"
-                                   value="${option.text}"
-                                   ${savedAnswer === option.text ? 'checked' : ''}>
+                                   value="${optionText}"
+                                   ${savedAnswer === optionText ? 'checked' : ''}>
                             <label class="form-check-label" for="option_${index}">
-                                ${option.text}
+                                ${optionText}
                             </label>
                         </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
 
                 <div class="question-actions mt-4">
@@ -256,19 +260,23 @@ class DatabaseAssessmentEngine {
                 ` : ''}
 
                 <div class="question-options">
-                    ${options.map((option, index) => `
+                    ${options.map((option, index) => {
+                        // Handle both string and object formats for options
+                        const optionText = typeof option === 'string' ? option : option.text;
+                        return `
                         <div class="form-check mb-3">
                             <input class="form-check-input"
                                    type="radio"
                                    name="question_${question.id}"
                                    id="option_${index}"
-                                   value="${option.text}"
-                                   ${savedAnswer === option.text ? 'checked' : ''}>
+                                   value="${optionText}"
+                                   ${savedAnswer === optionText ? 'checked' : ''}>
                             <label class="form-check-label" for="option_${index}">
-                                ${option.text}
+                                ${optionText}
                             </label>
                         </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
 
                 <div class="question-actions mt-4">
