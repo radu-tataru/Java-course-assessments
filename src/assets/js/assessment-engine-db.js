@@ -55,7 +55,7 @@ class DatabaseAssessmentEngine {
             this.showLoading('Preparing your assessment...');
 
             // Start assessment session
-            const response = await fetch(`${this.apiUrl}/assessments/start`, {
+            const response = await fetch(`${this.apiUrl}/assessment-handler?action=start`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -459,7 +459,7 @@ class DatabaseAssessmentEngine {
         try {
             const timeSpent = this.getQuestionTimeSpent();
 
-            const response = await authUtils.apiRequest(`${this.apiUrl}/assessments/submit-answer`, {
+            const response = await authUtils.apiRequest(`${this.apiUrl}/assessment-handler?action=submit-answer`, {
                 method: 'POST',
                 body: JSON.stringify({
                     attemptId: this.attemptData.id,
@@ -506,7 +506,7 @@ class DatabaseAssessmentEngine {
 
             const totalTimeSpent = this.getTotalTimeSpent();
 
-            const response = await authUtils.apiRequest(`${this.apiUrl}/assessments/submit-assessment`, {
+            const response = await authUtils.apiRequest(`${this.apiUrl}/assessment-handler?action=submit-assessment`, {
                 method: 'POST',
                 body: JSON.stringify({
                     attemptId: this.attemptData.id,
