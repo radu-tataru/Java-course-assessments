@@ -150,7 +150,10 @@
                             <div id="welcomeMessage" class="h5 mb-3"></div>
                         </div>
                         <div class="d-flex gap-3 justify-content-center">
-                            <a href="src/assessments/step1-assessment.html" class="btn btn-primary btn-sm">
+                            <a href="dashboard.html" class="btn btn-primary btn-sm">
+                                <i class="bi bi-house me-2"></i>Go to Dashboard
+                            </a>
+                            <a href="src/assessments/step1-assessment.html" class="btn btn-outline-light btn-sm">
                                 <i class="bi bi-play-circle me-2"></i>Start Step 1 Assessment
                             </a>
                             <a href="src/teacher-dashboard/dashboard.html" class="btn btn-outline-light btn-sm" id="teacherDashboardBtn" style="display:none;">
@@ -364,17 +367,14 @@
     <script src="src/assets/js/auth-utils.js"></script>
 
     <script>
-        // Redirect authenticated users to new dashboard
+        // Check authentication and redirect if not logged in
         document.addEventListener('DOMContentLoaded', () => {
-            if (authUtils.isAuthenticated()) {
-                // Redirect authenticated users to the new dashboard
-                window.location.href = 'dashboard.html';
-                return;
-            } else {
-                // Redirect unauthenticated users to login
+            if (!authUtils.isAuthenticated()) {
+                // Redirect to login page if not authenticated
                 window.location.href = 'index.html';
                 return;
             }
+            updateAuthDisplay();
         });
 
         function updateAuthDisplay() {
