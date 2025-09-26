@@ -390,9 +390,16 @@
                 // Set welcome message
                 welcomeMessage.textContent = `Welcome back, ${userData.firstName}!`;
 
-                // Show teacher dashboard button for teachers
-                if (userData.role === 'teacher') {
+                // Show teacher dashboard button for teachers and admins
+                if (userData.role === 'teacher' || userData.role === 'admin') {
                     teacherDashboardBtn.style.display = 'inline-block';
+
+                    // Update button text for admin users
+                    if (userData.role === 'admin') {
+                        teacherDashboardBtn.innerHTML = '<i class="bi bi-gear me-2"></i>Admin Dashboard';
+                    } else {
+                        teacherDashboardBtn.innerHTML = '<i class="bi bi-graph-up me-2"></i>Teacher Dashboard';
+                    }
                 }
             } else {
                 // Redirect to login if authentication is lost
