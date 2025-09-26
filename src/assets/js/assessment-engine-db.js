@@ -55,24 +55,33 @@ class DatabaseAssessmentEngine {
             this.showLoading('Preparing your assessment...');
 
             // Start assessment session
-            const response = await authUtils.apiRequest(`${this.apiUrl}/assessments/start`, {
+            const response = await fetch(`${this.apiUrl}/assessments/start`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authUtils.getToken()}`
+                },
                 body: JSON.stringify({ stepNumber })
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
             const data = await response.json();
 
             if (data.success) {
                 this.attemptData = data.attempt;
-                this.assessmentData = {
-                    id: data.attempt.assessmentId,
-                    title: data.attempt.assessmentTitle,
-                    duration_minutes: data.attempt.durationMinutes,
-                    total_questions: data.attempt.totalQuestions
-                };
+                this.assessmentData = data.assessment;
+                this.questions = data.questions || [];
 
-                // Load questions for this assessment
-                await this.loadQuestions();
+                // Store questions with proper formatting
+                this.questions = this.questions.map((q, index) => ({
+                    ...q,
+                    index: index,
+                    timeStarted: null,
+                    timeSpent: 0
+                }));
 
                 // Initialize timer if time limit is set
                 if (this.assessmentData.duration_minutes) {
