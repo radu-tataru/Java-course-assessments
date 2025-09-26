@@ -364,14 +364,17 @@
     <script src="src/assets/js/auth-utils.js"></script>
 
     <script>
-        // Check authentication and redirect if not logged in
+        // Redirect authenticated users to new dashboard
         document.addEventListener('DOMContentLoaded', () => {
-            if (!authUtils.isAuthenticated()) {
-                // Redirect to login page if not authenticated
+            if (authUtils.isAuthenticated()) {
+                // Redirect authenticated users to the new dashboard
+                window.location.href = 'dashboard.html';
+                return;
+            } else {
+                // Redirect unauthenticated users to login
                 window.location.href = 'index.html';
                 return;
             }
-            updateAuthDisplay();
         });
 
         function updateAuthDisplay() {

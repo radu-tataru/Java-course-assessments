@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Home</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+</head>
+<body style="background: white; padding: 0; margin: 0;">
+    <div class="container-fluid py-4">
+        <!-- Welcome Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-gradient text-white" style="background: var(--bg-gradient);">
+                    <div class="card-body py-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="mb-2">
+                                    <i class="bi bi-mortarboard me-2"></i>
+                                    Welcome to Java Course Assessments
+                                </h2>
+                                <p class="lead mb-0">Test your Java programming knowledge with interactive assessments</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <div class="d-flex flex-column align-items-md-end">
+                                    <div class="btn-group">
+                                        <button class="btn btn-light btn-sm" onclick="parent.loadContent('src/content/student-assessments.html')">
+                                            <i class="bi bi-play-circle me-1"></i>Start Assessment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-primary mb-2">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="assessmentsAvailable">1</h5>
+                        <small class="text-muted">Assessments Available</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-success mb-2">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="assessmentsCompleted">0</h5>
+                        <small class="text-muted">Completed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-warning mb-2">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="averageScore">-</h5>
+                        <small class="text-muted">Average Score</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-info mb-2">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="timeSpent">0h</h5>
+                        <small class="text-muted">Time Spent</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Assessments -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-ul me-2"></i>Available Assessments
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Step 1 Assessment -->
+                            <div class="col-lg-6 mb-3">
+                                <div class="card h-100 border-primary">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="badge bg-primary">Step 1</div>
+                                            <div class="badge bg-success">Available</div>
+                                        </div>
+                                        <h6 class="card-title">Basic File Reading</h6>
+                                        <p class="card-text small text-muted">
+                                            Test your understanding of Java file I/O operations, BufferedReader, and data parsing from TXT, CSV, and JSON files.
+                                        </p>
+                                        <div class="row text-center mb-3">
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Duration</small>
+                                                <strong>30 min</strong>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Questions</small>
+                                                <strong>10</strong>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Pass Rate</small>
+                                                <strong>70%</strong>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary btn-sm w-100" onclick="startAssessment(1)">
+                                            <i class="bi bi-play-circle me-1"></i>Start Assessment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coming Soon Assessments -->
+                            <div class="col-lg-6 mb-3">
+                                <div class="card h-100 border-secondary opacity-75">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="badge bg-secondary">Step 2</div>
+                                            <div class="badge bg-warning">Coming Soon</div>
+                                        </div>
+                                        <h6 class="card-title">Desktop API Integration</h6>
+                                        <p class="card-text small text-muted">
+                                            System integration capabilities, cross-platform browser opening, and Desktop API usage patterns.
+                                        </p>
+                                        <div class="row text-center mb-3">
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Duration</small>
+                                                <strong>25 min</strong>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Questions</small>
+                                                <strong>8</strong>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Pass Rate</small>
+                                                <strong>70%</strong>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-secondary btn-sm w-100" disabled>
+                                            <i class="bi bi-clock me-1"></i>Coming Soon
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function startAssessment(stepNumber) {
+            // Load the assessment in the parent frame
+            parent.loadContent('../assessments/step1-assessment.html');
+        }
+
+        // Load student stats on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudentStats();
+        });
+
+        async function loadStudentStats() {
+            try {
+                // This would call an API to get student progress
+                // For now, showing placeholder data
+                console.log('Loading student statistics...');
+            } catch (error) {
+                console.error('Failed to load student stats:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -213,23 +213,6 @@
 
     <!-- Main Container -->
     <div class="assessment-container">
-        <!-- Student Info (shown when authenticated) -->
-        <div class="student-info" id="studentInfo" style="display: none;">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h6 class="mb-1">Student Information</h6>
-                    <div id="studentDetails"></div>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <a href="../../home.html" class="btn btn-outline-secondary btn-sm me-2">
-                        <i class="bi bi-house me-1"></i>Home
-                    </a>
-                    <button class="btn btn-outline-danger btn-sm" onclick="authUtils.logout()">
-                        <i class="bi bi-box-arrow-right me-1"></i>Logout
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <!-- Progress Indicator (shown during assessment) -->
         <div class="progress-indicator" id="progressIndicator" style="display: none;">
@@ -324,9 +307,20 @@
         });
 
         async function initializePage() {
-            // Check authentication and redirect if not logged in
-            if (!authUtils.isAuthenticated()) {
-                window.location.href = '../../index.html';
+            // Check authentication - if in iframe, use parent's auth
+            if (window.parent !== window) {
+                // Running in iframe, check parent authentication
+                try {
+                    if (!authUtils.isAuthenticated()) {
+                        parent.location.href = '../../index.html';
+                        return;
+                    }
+                } catch (e) {
+                    // Cross-origin issues, assume authenticated
+                }
+            } else {
+                // Direct access, redirect to main dashboard
+                window.location.href = '../../dashboard.html';
                 return;
             }
             updateAuthDisplay();
@@ -348,37 +342,18 @@
         function updateAuthDisplay() {
             const loggedOutView = document.getElementById('loggedOutView');
             const loggedInView = document.getElementById('loggedInView');
-            const studentInfo = document.getElementById('studentInfo');
-            const studentDetails = document.getElementById('studentDetails');
 
             if (authUtils.isAuthenticated()) {
-                const userData = authUtils.getUserData();
-
                 // Show logged in view
                 loggedOutView.style.display = 'none';
                 loggedInView.style.display = 'block';
-                studentInfo.style.display = 'block';
-
-                // Update student details
-                studentDetails.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <div class="user-avatar me-3">
-                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
-                                ${userData.firstName[0]}${userData.lastName[0]}
-                            </div>
-                        </div>
-                        <div>
-                            <div class="fw-semibold">${userData.firstName} ${userData.lastName}</div>
-                            <div class="text-muted small">
-                                ${userData.email}
-                                ${userData.studentId ? `• ID: ${userData.studentId}` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
             } else {
                 // Redirect to login if authentication is lost
-                window.location.href = '../../index.html';
+                if (window.parent !== window) {
+                    parent.location.href = '../../index.html';
+                } else {
+                    window.location.href = '../../dashboard.html';
+                }
             }
         }
 

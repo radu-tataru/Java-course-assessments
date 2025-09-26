@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Course Assessment System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="src/assets/css/assessment-styles.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transition: var(--transition);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 0;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(3px);
+        }
+
+        .sidebar-nav a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: white;
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 0.75rem;
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .content-area {
+            margin-left: 280px;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+            background: #f8fafc;
+        }
+
+        .content-frame {
+            width: 100%;
+            height: 100vh;
+            border: none;
+            background: white;
+        }
+
+        .loading-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+            color: #6b7280;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1050;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .content-area {
+                margin-left: 0;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Navigation section dividers */
+        .nav-section {
+            margin: 1.5rem 0 0.5rem 0;
+            padding: 0 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .nav-section:first-child {
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <!-- Header -->
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <i class="bi bi-mortarboard"></i>
+                    Java Course
+                </div>
+                <div class="small opacity-75">Assessment System</div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="sidebar-nav-container">
+                <ul class="sidebar-nav" id="sidebarNav">
+                    <!-- Navigation items will be populated by JavaScript based on user role -->
+                </ul>
+            </div>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <div class="user-info" id="userInfo">
+                    <!-- User info will be populated by JavaScript -->
+                </div>
+                <button class="btn btn-outline-light btn-sm w-100" onclick="authUtils.logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="content-area">
+            <div class="loading-content" id="loadingContent">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div>Loading dashboard...</div>
+            </div>
+            <iframe id="contentFrame" class="content-frame" style="display: none;" src=""></iframe>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Authentication Utils -->
+    <script src="src/assets/js/auth-utils.js"></script>
+
+    <script>
+        let currentUser = null;
+
+        // Navigation configurations for different roles
+        const navigationConfig = {
+            student: [
+                { section: 'Dashboard' },
+                { icon: 'bi-house', text: 'Home', path: 'src/content/student-home.html' },
+                { icon: 'bi-play-circle', text: 'Assessments', path: 'src/content/student-assessments.html' },
+                { icon: 'bi-chart-bar', text: 'My Progress', path: 'src/content/student-progress.html' }
+            ],
+            teacher: [
+                { section: 'Dashboard' },
+                { icon: 'bi-house', text: 'Home', path: 'src/content/teacher-home.html' },
+                { icon: 'bi-people', text: 'Students', path: 'src/content/teacher-students.html' },
+                { icon: 'bi-file-text', text: 'Assessments', path: 'src/content/teacher-assessments.html' },
+                { icon: 'bi-graph-up', text: 'Analytics', path: 'src/content/teacher-analytics.html' },
+                { icon: 'bi-download', text: 'Reports', path: 'src/content/teacher-reports.html' }
+            ],
+            admin: [
+                { section: 'Dashboard' },
+                { icon: 'bi-house', text: 'Home', path: 'src/content/admin-home.html' },
+                { icon: 'bi-people', text: 'Students', path: 'src/content/teacher-students.html' },
+                { icon: 'bi-file-text', text: 'Assessments', path: 'src/content/teacher-assessments.html' },
+                { icon: 'bi-graph-up', text: 'Analytics', path: 'src/content/teacher-analytics.html' },
+                { icon: 'bi-download', text: 'Reports', path: 'src/content/teacher-reports.html' },
+                { section: 'Administration' },
+                { icon: 'bi-person-gear', text: 'User Management', path: 'src/content/admin-users.html' },
+                { icon: 'bi-gear', text: 'System Settings', path: 'src/content/admin-settings.html' }
+            ]
+        };
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Check authentication
+                if (!authUtils.isAuthenticated()) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentUser = authUtils.getUserData();
+                setupNavigation();
+                updateUserInfo();
+
+                // Load default content based on role
+                const defaultPath = getDefaultPath();
+                loadContent(defaultPath);
+
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+                window.location.href = 'index.html';
+            }
+        });
+
+        function setupNavigation() {
+            const nav = document.getElementById('sidebarNav');
+            const config = navigationConfig[currentUser.role] || navigationConfig.student;
+
+            nav.innerHTML = config.map(item => {
+                if (item.section) {
+                    return `<div class="nav-section">${item.section}</div>`;
+                }
+
+                return `
+                    <li>
+                        <a href="#" onclick="loadContent('${item.path}')" data-path="${item.path}">
+                            <i class="${item.icon}"></i>
+                            ${item.text}
+                        </a>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function updateUserInfo() {
+            const userInfo = document.getElementById('userInfo');
+            const initials = `${currentUser.firstName[0]}${currentUser.lastName[0]}`;
+
+            userInfo.innerHTML = `
+                <div class="user-avatar">${initials}</div>
+                <div class="user-details">
+                    <div class="user-name">${currentUser.firstName} ${currentUser.lastName}</div>
+                    <div class="user-role">
+                        <span class="role-badge">${currentUser.role}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getDefaultPath() {
+            const config = navigationConfig[currentUser.role] || navigationConfig.student;
+            const firstContentItem = config.find(item => item.path);
+            return firstContentItem ? firstContentItem.path : 'src/content/student-home.html';
+        }
+
+        function loadContent(path) {
+            const frame = document.getElementById('contentFrame');
+            const loading = document.getElementById('loadingContent');
+
+            // Update active navigation
+            updateActiveNav(path);
+
+            // Show loading
+            frame.style.display = 'none';
+            loading.style.display = 'flex';
+
+            // Load content in iframe
+            frame.onload = () => {
+                loading.style.display = 'none';
+                frame.style.display = 'block';
+            };
+
+            frame.onerror = () => {
+                loading.innerHTML = `
+                    <div class="text-center">
+                        <i class="bi bi-exclamation-circle text-warning mb-3" style="font-size: 3rem;"></i>
+                        <h5>Content Not Available</h5>
+                        <p class="text-muted">The requested page is not yet available.</p>
+                        <button class="btn btn-primary btn-sm" onclick="loadContent(getDefaultPath())">
+                            <i class="bi bi-house me-1"></i>Go to Home
+                        </button>
+                    </div>
+                `;
+            };
+
+            frame.src = path;
+
+            // Hide mobile menu after selection
+            if (window.innerWidth <= 768) {
+                hideSidebar();
+            }
+        }
+
+        function updateActiveNav(currentPath) {
+            const navLinks = document.querySelectorAll('.sidebar-nav a[data-path]');
+            navLinks.forEach(link => {
+                if (link.dataset.path === currentPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        function hideSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('show');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+
+            if (window.innerWidth <= 768 &&
+                !sidebar.contains(e.target) &&
+                !toggle.contains(e.target) &&
+                sidebar.classList.contains('show')) {
+                hideSidebar();
+            }
+        });
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.path) {
+                loadContent(e.state.path);
+            }
+        });
+
+        // Add state to browser history when loading content
+        function loadContentWithHistory(path) {
+            history.pushState({ path }, '', `#${path.split('/').pop().replace('.html', '')}`);
+            loadContent(path);
+        }
+    </script>
+</body>
+</html>
