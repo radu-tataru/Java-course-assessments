@@ -34,5 +34,10 @@
         }
       ]
     }
-  ]
+  ],
+  "env": {
+    "POSTGRES_URL": "@postgres_url",
+    "JWT_SECRET": "@jwt_secret",
+    "JUDGE0_API_KEY": "@judge0_api_key"
+  }
 }
