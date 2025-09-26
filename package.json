@@ -1,7 +1,7 @@
 {
   "name": "java-assessment-system",
   "version": "1.0.0",
-  "description": "Java Course Assessment System with live code execution",
+  "description": "Java Course Assessment System with live code execution and authentication",
   "main": "index.html",
   "scripts": {
     "dev": "vercel dev",
@@ -9,9 +9,12 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.5.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
     "node-fetch": "^2.6.7"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   }
 }

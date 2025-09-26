@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Java Course Assessment System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .dashboard-sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            z-index: 1000;
+            transition: var(--transition);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-content {
+            margin-left: 260px;
+            padding: 2rem;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 0 25px 25px 0;
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .teacher-info {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+
+        .teacher-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .student-table {
+            overflow-x: auto;
+        }
+
+        .student-avatar-small {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar-custom {
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), #10b981);
+            transition: width 0.3s ease;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .auth-required {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .access-denied {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .dashboard-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-export {
+            background: var(--success-color);
+            border: none;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #059669;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-passed {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .status-failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+
+        .status-in-progress {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <h5 class="mb-1">Teacher Dashboard</h5>
+            <p class="small mb-0 opacity-75">Java Assessment System</p>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li><a href="#overview" class="nav-link active" data-section="overview">
+                <i class="bi bi-house"></i>Overview
+            </a></li>
+            <li><a href="#students" class="nav-link" data-section="students">
+                <i class="bi bi-people"></i>Students
+            </a></li>
+            <li><a href="#assessments" class="nav-link" data-section="assessments">
+                <i class="bi bi-file-text"></i>Assessments
+            </a></li>
+            <li><a href="#analytics" class="nav-link" data-section="analytics">
+                <i class="bi bi-graph-up"></i>Analytics
+            </a></li>
+            <li><a href="#reports" class="nav-link" data-section="reports">
+                <i class="bi bi-download"></i>Reports
+            </a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="teacher-info-sidebar" id="teacherInfoSidebar"></div>
+            <button class="btn btn-outline-light btn-sm w-100 mt-2" onclick="authUtils.logout()">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Authentication Check -->
+        <div id="authCheck">
+            <!-- Loading -->
+            <div id="loadingView" class="loading-spinner">
+                <div class="text-center">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <div class="h5">Loading dashboard...</div>
+                </div>
+            </div>
+
+            <!-- Not authenticated -->
+            <div id="notAuthenticatedView" class="auth-required" style="display: none;">
+                <i class="bi bi-shield-exclamation display-1 text-warning mb-4"></i>
+                <h2>Authentication Required</h2>
+                <p class="lead text-muted mb-4">
+                    You must be logged in to access the teacher dashboard.
+                </p>
+                <div>
+                    <a href="../auth/login.html" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    </a>
+                    <a href="../../index.html" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+
+            <!-- Access denied -->
+            <div id="accessDeniedView" class="access-denied" style="display: none;">
+                <i class="bi bi-shield-x display-1 text-danger mb-4"></i>
+                <h2>Access Denied</h2>
+                <p class="lead text-muted mb-4">
+                    This dashboard is only available to teachers and administrators.
+                </p>
+                <div>
+                    <a href="../assessments/step1-db-assessment.html" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-play-circle me-2"></i>Take Assessment
+                    </a>
+                    <a href="../../index.html" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+
+            <!-- Authenticated and authorized -->
+            <div id="dashboardView" style="display: none;">
+                <!-- Teacher Header -->
+                <div class="dashboard-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="teacher-info">
+                            <div id="teacherInfoHeader"></div>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="initializeDatabase()">
+                                <i class="bi bi-database-up me-1"></i>Initialize Database
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Sections -->
+                <div id="dashboardContent">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="content-section">
+                        <div class="section-header">
+                            <h4><i class="bi bi-house me-2"></i>Dashboard Overview</h4>
+                            <span class="text-muted" id="lastUpdated">Last updated: Loading...</span>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="stats-grid" id="statsGrid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div class="stat-number" id="totalStudents">0</div>
+                                <div class="stat-label">Total Students</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                <div class="stat-number" id="totalAssessments">0</div>
+                                <div class="stat-label">Assessments</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="stat-number" id="completedAttempts">0</div>
+                                <div class="stat-label">Completed Attempts</div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-trophy"></i>
+                                </div>
+                                <div class="stat-number" id="averageScore">0%</div>
+                                <div class="stat-label">Average Score</div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="content-section">
+                            <h5><i class="bi bi-clock-history me-2"></i>Recent Activity</h5>
+                            <div id="recentActivity">
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    <p class="mt-2">Loading recent activity...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Students Section -->
+                    <div id="students-section" class="content-section" style="display: none;">
+                        <div class="section-header">
+                            <h4><i class="bi bi-people me-2"></i>Student Management</h4>
+                            <div>
+                                <button class="btn btn-export btn-sm" onclick="exportStudentData()">
+                                    <i class="bi bi-download me-1"></i>Export Data
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="student-table">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Student</th>
+                                            <th>Email</th>
+                                            <th>Student ID</th>
+                                            <th>Assessments Taken</th>
+                                            <th>Average Score</th>
+                                            <th>Last Activity</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="studentsTableBody">
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="bi bi-hourglass-split"></i>
+                                                <p class="mt-2">Loading students...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assessments Section -->
+                    <div id="assessments-section" class="content-section" style="display: none;">
+                        <div class="section-header">
+                            <h4><i class="bi bi-file-text me-2"></i>Assessment Management</h4>
+                        </div>
+
+                        <div id="assessmentsList">
+                            <div class="text-center text-muted py-4">
+                                <i class="bi bi-hourglass-split"></i>
+                                <p class="mt-2">Loading assessments...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div id="analytics-section" class="content-section" style="display: none;">
+                        <div class="section-header">
+                            <h4><i class="bi bi-graph-up me-2"></i>Analytics & Performance</h4>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="chart-container">
+                                    <h6>Score Distribution</h6>
+                                    <canvas id="scoreChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="chart-container">
+                                    <h6>Assessment Completion</h6>
+                                    <canvas id="completionChart" width="200" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Section -->
+                    <div id="reports-section" class="content-section" style="display: none;">
+                        <div class="section-header">
+                            <h4><i class="bi bi-download me-2"></i>Reports & Export</h4>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-file-earmark-spreadsheet display-4 text-success mb-3"></i>
+                                        <h6>Student Data CSV</h6>
+                                        <p class="small text-muted">Export all student information and progress</p>
+                                        <button class="btn btn-success btn-sm" onclick="exportStudentCSV()">
+                                            <i class="bi bi-download me-1"></i>Download CSV
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-file-earmark-pdf display-4 text-danger mb-3"></i>
+                                        <h6>Assessment Report PDF</h6>
+                                        <p class="small text-muted">Detailed assessment performance report</p>
+                                        <button class="btn btn-danger btn-sm" onclick="exportAssessmentPDF()">
+                                            <i class="bi bi-download me-1"></i>Download PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-graph-up display-4 text-info mb-3"></i>
+                                        <h6>Analytics Report</h6>
+                                        <p class="small text-muted">Comprehensive analytics and insights</p>
+                                        <button class="btn btn-info btn-sm" onclick="exportAnalyticsReport()">
+                                            <i class="bi bi-download me-1"></i>Download Report
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Authentication Utils -->
+    <script src="../assets/js/auth-utils.js"></script>
+
+    <script>
+        let dashboardData = {};
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+        });
+
+        async function initializeDashboard() {
+            try {
+                // Check authentication
+                await authUtils.initAuth();
+
+                if (!authUtils.isAuthenticated()) {
+                    showView('notAuthenticatedView');
+                    return;
+                }
+
+                const userData = authUtils.getUserData();
+
+                // Check if user is teacher or admin
+                if (userData.role !== 'teacher' && userData.role !== 'admin') {
+                    showView('accessDeniedView');
+                    return;
+                }
+
+                // Show dashboard and load data
+                showView('dashboardView');
+                updateTeacherInfo(userData);
+                setupNavigation();
+                await loadDashboardData();
+
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+                showError('Failed to initialize dashboard');
+            }
+        }
+
+        function showView(viewId) {
+            const views = ['loadingView', 'notAuthenticatedView', 'accessDeniedView', 'dashboardView'];
+            views.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = id === viewId ? 'block' : 'none';
+                }
+            });
+        }
+
+        function updateTeacherInfo(userData) {
+            const initials = `${userData.firstName[0]}${userData.lastName[0]}`;
+            const fullName = `${userData.firstName} ${userData.lastName}`;
+
+            // Update header
+            const headerInfo = document.getElementById('teacherInfoHeader');
+            headerInfo.innerHTML = `
+                <div class="teacher-avatar">${initials}</div>
+                <div>
+                    <h6 class="mb-0">Welcome, ${userData.firstName}!</h6>
+                    <small class="text-muted">${userData.email}</small>
+                </div>
+            `;
+
+            // Update sidebar
+            const sidebarInfo = document.getElementById('teacherInfoSidebar');
+            sidebarInfo.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light text-primary me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem; font-weight: 600;">
+                        ${initials}
+                    </div>
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="small fw-semibold">${fullName}</div>
+                        <div class="small opacity-75" style="font-size: 0.7rem;">${userData.role.toUpperCase()}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    // Update active state
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    // Show corresponding section
+                    const section = link.getAttribute('data-section');
+                    showSection(section);
+                });
+            });
+        }
+
+        function showSection(sectionName) {
+            const sections = ['overview', 'students', 'assessments', 'analytics', 'reports'];
+            sections.forEach(name => {
+                const element = document.getElementById(`${name}-section`);
+                if (element) {
+                    element.style.display = name === sectionName ? 'block' : 'none';
+                }
+            });
+
+            // Load section-specific data
+            switch (sectionName) {
+                case 'students':
+                    loadStudentData();
+                    break;
+                case 'assessments':
+                    loadAssessmentData();
+                    break;
+                case 'analytics':
+                    loadAnalyticsData();
+                    break;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load overview stats
+                await loadOverviewStats();
+
+                // Update last updated time
+                document.getElementById('lastUpdated').textContent =
+                    `Last updated: ${new Date().toLocaleString()}`;
+
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        async function loadOverviewStats() {
+            try {
+                const response = await authUtils.apiRequest('/api/assessments/stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.stats;
+
+                    // Update stat cards
+                    document.getElementById('totalStudents').textContent =
+                        stats.totalStudents || '0';
+                    document.getElementById('totalAssessments').textContent =
+                        stats.totalAssessments || '1';
+                    document.getElementById('completedAttempts').textContent =
+                        stats.completedAttempts || '0';
+                    document.getElementById('averageScore').textContent =
+                        `${(stats.averageScore || 0).toFixed(1)}%`;
+                }
+
+            } catch (error) {
+                console.error('Failed to load overview stats:', error);
+            }
+        }
+
+        async function loadStudentData() {
+            try {
+                const response = await authUtils.apiRequest('/api/assessments/progress');
+                const data = await response.json();
+
+                if (data.success) {
+                    renderStudentTable(data.progress);
+                }
+
+            } catch (error) {
+                console.error('Failed to load student data:', error);
+                showError('Failed to load student data');
+            }
+        }
+
+        function renderStudentTable(students) {
+            const tbody = document.getElementById('studentsTableBody');
+
+            if (!students || students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No students found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = students.map(student => {
+                const initials = `${student.first_name[0]}${student.last_name[0]}`;
+                const avgScore = student.avg_score ? parseFloat(student.avg_score).toFixed(1) : '0.0';
+                const lastActivity = student.last_submission ?
+                    new Date(student.last_submission).toLocaleDateString() : 'Never';
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="student-avatar-small me-3">${initials}</div>
+                                <div>
+                                    <div class="fw-semibold">${student.first_name} ${student.last_name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${student.email}</td>
+                        <td>${student.student_id || 'N/A'}</td>
+                        <td>${student.assessments_taken || 0}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress-bar-custom me-2" style="width: 60px;">
+                                    <div class="progress-fill" style="width: ${avgScore}%;"></div>
+                                </div>
+                                <span class="small">${avgScore}%</span>
+                            </div>
+                        </td>
+                        <td>${lastActivity}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewStudentDetails(${student.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function initializeDatabase() {
+            try {
+                const button = event.target;
+                const originalText = button.innerHTML;
+
+                button.disabled = true;
+                button.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Initializing...';
+
+                const response = await authUtils.apiRequest('/api/init-db', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Database initialized successfully!', 'success');
+                    await loadDashboardData();
+                } else {
+                    showAlert(data.error || 'Failed to initialize database', 'danger');
+                }
+
+            } catch (error) {
+                console.error('Database initialization error:', error);
+                showAlert('Failed to initialize database: ' + error.message, 'danger');
+            } finally {
+                const button = event.target;
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            const dashboardHeader = document.querySelector('.dashboard-header');
+            dashboardHeader.insertAdjacentHTML('afterend', alertHTML);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+
+        function showError(message) {
+            showAlert(message, 'danger');
+        }
+
+        // Placeholder functions for future implementation
+        async function loadAssessmentData() {
+            console.log('Loading assessment data...');
+        }
+
+        async function loadAnalyticsData() {
+            console.log('Loading analytics data...');
+        }
+
+        function viewStudentDetails(studentId) {
+            console.log('Viewing student details for ID:', studentId);
+        }
+
+        function exportStudentData() {
+            console.log('Exporting student data...');
+        }
+
+        function exportStudentCSV() {
+            console.log('Exporting student CSV...');
+        }
+
+        function exportAssessmentPDF() {
+            console.log('Exporting assessment PDF...');
+        }
+
+        function exportAnalyticsReport() {
+            console.log('Exporting analytics report...');
+        }
+    </script>
+</body>
+</html>

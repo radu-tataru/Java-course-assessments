@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 1 Assessment - Basic File Reading | Java Course Assessment System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Code highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- CodeMirror for code editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/matchbrackets.min.js"></script>
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+
+    <style>
+        .assessment-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .student-info {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .start-button {
+            background: var(--success-color);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .start-button:hover {
+            background: #059669;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .timer-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 1050;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .progress-indicator {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .code-snippet {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .form-check-input:checked + .form-check-label {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .question-actions {
+            border-top: 1px solid #e9ecef;
+            padding-top: 2rem;
+            margin-top: 2rem;
+        }
+
+        .CodeMirror {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .CodeMirror-focused {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .execution-result {
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+        }
+
+        .execution-success {
+            background-color: #d1edff;
+            border: 1px solid #0dcaf0;
+            color: #055160;
+        }
+
+        .execution-error {
+            background-color: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .assessment-container {
+                padding: 1rem;
+            }
+
+            .timer-container {
+                position: static;
+                margin-bottom: 1rem;
+                text-align: center;
+                display: block;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+        }
+
+        .btn-auth-required {
+            background: var(--warning-color);
+            border: none;
+            color: white;
+        }
+
+        .alert-auth {
+            border-radius: 12px;
+            border: none;
+            padding: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer -->
+    <div class="timer-container" id="timerContainer">
+        <i class="bi bi-clock me-2"></i>
+        <span id="timerDisplay">30:00</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="assessment-container">
+        <!-- Student Info (shown when authenticated) -->
+        <div class="student-info" id="studentInfo" style="display: none;">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h6 class="mb-1">Student Information</h6>
+                    <div id="studentDetails"></div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <button class="btn btn-outline-danger btn-sm" onclick="authUtils.logout()">
+                        <i class="bi bi-box-arrow-right me-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Indicator (shown during assessment) -->
+        <div class="progress-indicator" id="progressIndicator" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-semibold" id="progressText">Question 1 of 10</span>
+                <span class="text-muted" id="progressPercent">10%</span>
+            </div>
+            <div class="progress-bar-custom">
+                <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
+            </div>
+        </div>
+
+        <!-- Assessment Content -->
+        <div id="assessmentContent">
+            <!-- Welcome Screen (default) -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h1 class="h2 mb-3">Step 1: Basic File Reading Assessment</h1>
+                <p class="lead text-muted mb-4">
+                    Test your understanding of Java file I/O operations, BufferedReader usage, and data parsing from TXT, CSV, and JSON files.
+                </p>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Assessment Details</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-clock text-primary me-2"></i>Duration: 30 minutes</li>
+                                    <li><i class="bi bi-question-circle text-primary me-2"></i>Questions: 10 questions</li>
+                                    <li><i class="bi bi-award text-primary me-2"></i>Passing Score: 70%</li>
+                                    <li><i class="bi bi-shield-check text-primary me-2"></i>Auto-save enabled</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authentication Check -->
+                <div id="authCheck">
+                    <!-- Logged out view -->
+                    <div id="loggedOutView">
+                        <div class="alert alert-auth alert-warning mt-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            You must be logged in to take assessments.
+                        </div>
+                        <div class="mt-3">
+                            <a href="../auth/login.html" class="btn btn-auth-required btn-lg me-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </a>
+                            <a href="../auth/register.html" class="btn btn-outline-warning btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>Register
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Logged in view -->
+                    <div id="loggedInView" style="display: none;">
+                        <button class="btn start-button" id="startAssessment">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Start Assessment
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Questions (will be populated by JS) -->
+            <div id="questionContainer" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Authentication Utils -->
+    <script src="../assets/js/auth-utils.js"></script>
+
+    <!-- Assessment Engine -->
+    <script src="../assets/js/assessment-engine-db.js"></script>
+
+    <!-- Judge0 Integration (if needed for coding challenges) -->
+    <script src="../assets/js/judge0-integration.js"></script>
+
+    <script>
+        let assessmentEngine;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePage();
+        });
+
+        async function initializePage() {
+            // Check authentication status
+            updateAuthDisplay();
+
+            // Setup event listeners
+            const startBtn = document.getElementById('startAssessment');
+            if (startBtn) {
+                startBtn.addEventListener('click', startAssessment);
+            }
+
+            // Listen for auth changes
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'auth_token' || e.key === 'user_data') {
+                    updateAuthDisplay();
+                }
+            });
+        }
+
+        function updateAuthDisplay() {
+            const loggedOutView = document.getElementById('loggedOutView');
+            const loggedInView = document.getElementById('loggedInView');
+            const studentInfo = document.getElementById('studentInfo');
+            const studentDetails = document.getElementById('studentDetails');
+
+            if (authUtils.isAuthenticated()) {
+                const userData = authUtils.getUserData();
+
+                // Show logged in view
+                loggedOutView.style.display = 'none';
+                loggedInView.style.display = 'block';
+                studentInfo.style.display = 'block';
+
+                // Update student details
+                studentDetails.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-3">
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                ${userData.firstName[0]}${userData.lastName[0]}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">${userData.firstName} ${userData.lastName}</div>
+                            <div class="text-muted small">
+                                ${userData.email}
+                                ${userData.studentId ? `• ID: ${userData.studentId}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show logged out view
+                loggedInView.style.display = 'none';
+                loggedOutView.style.display = 'block';
+                studentInfo.style.display = 'none';
+            }
+        }
+
+        async function startAssessment() {
+            try {
+                // Hide welcome screen
+                document.getElementById('welcomeScreen').style.display = 'none';
+
+                // Show progress indicator
+                document.getElementById('progressIndicator').style.display = 'block';
+
+                // Show question container
+                document.getElementById('questionContainer').style.display = 'block';
+
+                // Initialize assessment engine
+                assessmentEngine = new DatabaseAssessmentEngine('questionContainer', {
+                    showProgress: true,
+                    allowSkip: true,
+                    autoSave: true,
+                    autoSaveInterval: 30000
+                });
+
+                // Start Step 1 assessment
+                await assessmentEngine.startAssessment(1);
+
+                // Show timer
+                document.getElementById('timerContainer').style.display = 'block';
+
+            } catch (error) {
+                console.error('Failed to start assessment:', error);
+                showError('Failed to start assessment. Please try again.');
+            }
+        }
+
+        function showError(message) {
+            const questionContainer = document.getElementById('questionContainer');
+            questionContainer.innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    ${message}
+                </div>
+            `;
+        }
+
+        // Update progress indicator
+        function updateProgress(currentQuestion, totalQuestions) {
+            const progressText = document.getElementById('progressText');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressFill = document.getElementById('progressFill');
+
+            if (progressText && progressPercent && progressFill) {
+                const percent = Math.round((currentQuestion / totalQuestions) * 100);
+
+                progressText.textContent = `Question ${currentQuestion} of ${totalQuestions}`;
+                progressPercent.textContent = `${percent}%`;
+                progressFill.style.width = `${percent}%`;
+            }
+        }
+
+        // Timer functionality
+        let timerInterval;
+
+        function startTimer(durationInSeconds) {
+            let remainingTime = durationInSeconds;
+            const timerDisplay = document.getElementById('timerDisplay');
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    // Auto-submit assessment
+                    if (assessmentEngine) {
+                        assessmentEngine.submitAssessment();
+                    }
+                } else if (remainingTime <= 300) { // Last 5 minutes
+                    document.getElementById('timerContainer').style.background = 'var(--danger-color)';
+                }
+
+                remainingTime--;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        }
+
+        // Handle page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (assessmentEngine && assessmentEngine.attemptData && assessmentEngine.attemptData.status === 'in_progress') {
+                e.preventDefault();
+                e.returnValue = '';
+                return 'Your assessment progress will be saved, but you may lose your current work.';
+            }
+        });
+
+        // Global functions for assessment engine callbacks
+        window.updateProgress = updateProgress;
+        window.startTimer = startTimer;
+        window.stopTimer = stopTimer;
+    </script>
+</body>
+</html>

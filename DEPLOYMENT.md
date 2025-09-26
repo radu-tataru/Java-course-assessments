@@ -1,4 +1,6 @@
-# Java Assessment System - Deployment Guide
+# Java Course Assessment System - Database Deployment Guide
+
+## 🚀 Version 2.0: Full-Stack with Authentication & Database
 
 ## Deployment Options
 

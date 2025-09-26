@@ -5,6 +5,15 @@
   "functions": {
     "api/submissions.js": {
       "maxDuration": 30
+    },
+    "api/auth.js": {
+      "maxDuration": 30
+    },
+    "api/assessments.js": {
+      "maxDuration": 30
+    },
+    "api/init-db.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
@@ -17,13 +26,18 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
+          "value": "GET, POST, PUT, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type"
+          "value": "Content-Type, Authorization"
         }
       ]
     }
-  ]
+  ],
+  "env": {
+    "POSTGRES_URL": "@postgres_url",
+    "JWT_SECRET": "@jwt_secret",
+    "JUDGE0_API_KEY": "@judge0_api_key"
+  }
 }

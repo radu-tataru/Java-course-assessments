@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Java Assessment System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            padding: 2rem 0;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            margin: 2rem auto;
+        }
+
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 2rem auto;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 144, 220, 0.25);
+        }
+
+        .btn-auth {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-auth:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 144, 220, 0.3);
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+
+        .loading-spinner {
+            display: none;
+        }
+
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+
+        .loading .btn-text {
+            display: none;
+        }
+
+        .password-strength {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .strength-weak { color: var(--danger-color); }
+        .strength-medium { color: var(--warning-color); }
+        .strength-strong { color: var(--success-color); }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="container">
+            <div class="auth-card">
+                <div class="auth-logo">
+                    <i class="bi bi-mortarboard"></i>
+                </div>
+
+                <div class="text-center mb-4">
+                    <h1 class="h3 mb-2">Create Account</h1>
+                    <p class="text-muted">Join the Java Assessment System</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="alertContainer"></div>
+
+                <form id="registerForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="firstName"
+                                   name="firstName"
+                                   required
+                                   placeholder="Enter first name">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="lastName"
+                                   name="lastName"
+                                   required
+                                   placeholder="Enter last name">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email"
+                               class="form-control"
+                               id="email"
+                               name="email"
+                               required
+                               placeholder="Enter your email">
+                        <div class="form-text">We'll use this for login and notifications</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="studentId" class="form-label">Student ID <span class="text-muted">(Optional)</span></label>
+                        <input type="text"
+                               class="form-control"
+                               id="studentId"
+                               name="studentId"
+                               placeholder="Enter your student ID">
+                        <div class="form-text">Your unique student identifier</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password"
+                               class="form-control"
+                               id="password"
+                               name="password"
+                               required
+                               placeholder="Create a strong password"
+                               minlength="6">
+                        <div id="passwordStrength" class="password-strength"></div>
+                        <div class="form-text">Minimum 6 characters required</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password"
+                               class="form-control"
+                               id="confirmPassword"
+                               name="confirmPassword"
+                               required
+                               placeholder="Confirm your password">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="student" selected>Student</option>
+                            <option value="teacher">Teacher</option>
+                        </select>
+                        <div class="form-text">Select your role in the assessment system</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-auth btn-primary w-100 mb-3">
+                        <span class="loading-spinner spinner-border spinner-border-sm me-2" role="status"></span>
+                        <span class="btn-text">
+                            <i class="bi bi-person-plus me-2"></i>Create Account
+                        </span>
+                    </button>
+                </form>
+
+                <div class="text-center">
+                    <p class="mb-0">Already have an account?
+                        <a href="login.html" class="text-decoration-none fw-semibold">Sign in here</a>
+                    </p>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <a href="../../index.html" class="text-muted text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        class RegisterManager {
+            constructor() {
+                this.apiUrl = '/api';
+                this.init();
+            }
+
+            init() {
+                const form = document.getElementById('registerForm');
+                if (form) {
+                    form.addEventListener('submit', (e) => this.handleRegister(e));
+                }
+
+                // Password strength checker
+                const passwordInput = document.getElementById('password');
+                if (passwordInput) {
+                    passwordInput.addEventListener('input', (e) => this.checkPasswordStrength(e.target.value));
+                }
+
+                // Password confirmation checker
+                const confirmPasswordInput = document.getElementById('confirmPassword');
+                if (confirmPasswordInput) {
+                    confirmPasswordInput.addEventListener('input', () => this.checkPasswordMatch());
+                }
+
+                // Check if already logged in
+                const token = localStorage.getItem('auth_token');
+                if (token) {
+                    this.redirectToDashboard();
+                }
+            }
+
+            async handleRegister(e) {
+                e.preventDefault();
+
+                const form = e.target;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const formData = new FormData(form);
+
+                const registerData = {
+                    firstName: formData.get('firstName').trim(),
+                    lastName: formData.get('lastName').trim(),
+                    email: formData.get('email').trim(),
+                    password: formData.get('password'),
+                    studentId: formData.get('studentId')?.trim() || null,
+                    role: formData.get('role')
+                };
+
+                // Validation
+                if (!this.validateForm(registerData, formData.get('confirmPassword'))) {
+                    return;
+                }
+
+                try {
+                    // Show loading state
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    this.clearAlerts();
+
+                    const response = await fetch(`${this.apiUrl}/auth/register`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(registerData)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Store auth token and user data
+                        localStorage.setItem('auth_token', data.token);
+                        localStorage.setItem('user_data', JSON.stringify(data.user));
+
+                        this.showAlert('Account created successfully! Redirecting...', 'success');
+
+                        // Redirect after short delay
+                        setTimeout(() => {
+                            this.redirectToDashboard();
+                        }, 1500);
+
+                    } else {
+                        this.showAlert(data.error || 'Registration failed', 'danger');
+                    }
+
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    this.showAlert('Network error. Please try again.', 'danger');
+                } finally {
+                    // Hide loading state
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            validateForm(data, confirmPassword) {
+                // Check required fields
+                if (!data.firstName || !data.lastName || !data.email || !data.password) {
+                    this.showAlert('Please fill in all required fields', 'danger');
+                    return false;
+                }
+
+                // Check email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(data.email)) {
+                    this.showAlert('Please enter a valid email address', 'danger');
+                    return false;
+                }
+
+                // Check password length
+                if (data.password.length < 6) {
+                    this.showAlert('Password must be at least 6 characters long', 'danger');
+                    return false;
+                }
+
+                // Check password match
+                if (data.password !== confirmPassword) {
+                    this.showAlert('Passwords do not match', 'danger');
+                    return false;
+                }
+
+                return true;
+            }
+
+            checkPasswordStrength(password) {
+                const strengthElement = document.getElementById('passwordStrength');
+
+                if (password.length === 0) {
+                    strengthElement.textContent = '';
+                    return;
+                }
+
+                let strength = 0;
+                let feedback = [];
+
+                // Length check
+                if (password.length >= 8) strength += 1;
+                else feedback.push('at least 8 characters');
+
+                // Uppercase check
+                if (/[A-Z]/.test(password)) strength += 1;
+                else feedback.push('an uppercase letter');
+
+                // Lowercase check
+                if (/[a-z]/.test(password)) strength += 1;
+                else feedback.push('a lowercase letter');
+
+                // Number check
+                if (/\d/.test(password)) strength += 1;
+                else feedback.push('a number');
+
+                // Special character check
+                if (/[!@#$%^&*()_+\-=\[\]{}|;:.,<>?]/.test(password)) strength += 1;
+                else feedback.push('a special character');
+
+                // Display strength
+                if (strength < 2) {
+                    strengthElement.className = 'password-strength strength-weak';
+                    strengthElement.textContent = `Weak - Add ${feedback.slice(0, 2).join(' and ')}`;
+                } else if (strength < 4) {
+                    strengthElement.className = 'password-strength strength-medium';
+                    strengthElement.textContent = 'Medium - Could be stronger';
+                } else {
+                    strengthElement.className = 'password-strength strength-strong';
+                    strengthElement.textContent = 'Strong password';
+                }
+            }
+
+            checkPasswordMatch() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const confirmInput = document.getElementById('confirmPassword');
+
+                if (confirmPassword.length === 0) {
+                    confirmInput.classList.remove('is-valid', 'is-invalid');
+                    return;
+                }
+
+                if (password === confirmPassword) {
+                    confirmInput.classList.remove('is-invalid');
+                    confirmInput.classList.add('is-valid');
+                } else {
+                    confirmInput.classList.remove('is-valid');
+                    confirmInput.classList.add('is-invalid');
+                }
+            }
+
+            redirectToDashboard() {
+                const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+
+                if (userData.role === 'teacher') {
+                    window.location.href = '../teacher-dashboard/dashboard.html';
+                } else {
+                    window.location.href = '../assessments/step1-assessment.html';
+                }
+            }
+
+            showAlert(message, type = 'info') {
+                const container = document.getElementById('alertContainer');
+                const alertId = 'alert-' + Date.now();
+
+                const alertHTML = `
+                    <div id="${alertId}" class="alert alert-${type} alert-custom alert-dismissible fade show" role="alert">
+                        <i class="bi bi-${this.getAlertIcon(type)} me-2"></i>
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+                container.innerHTML = alertHTML;
+
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    const alert = document.getElementById(alertId);
+                    if (alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            }
+
+            clearAlerts() {
+                const container = document.getElementById('alertContainer');
+                container.innerHTML = '';
+            }
+
+            getAlertIcon(type) {
+                const icons = {
+                    success: 'check-circle',
+                    danger: 'exclamation-triangle',
+                    warning: 'exclamation-triangle',
+                    info: 'info-circle'
+                };
+                return icons[type] || 'info-circle';
+            }
+        }
+
+        // Initialize register manager
+        document.addEventListener('DOMContentLoaded', () => {
+            new RegisterManager();
+        });
+    </script>
+</body>
+</html>
