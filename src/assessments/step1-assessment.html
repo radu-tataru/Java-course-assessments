@@ -321,7 +321,11 @@
         });
 
         async function initializePage() {
-            // Check authentication status
+            // Check authentication and redirect if not logged in
+            if (!authUtils.isAuthenticated()) {
+                window.location.href = '../../index.html';
+                return;
+            }
             updateAuthDisplay();
 
             // Setup event listeners
@@ -370,10 +374,8 @@
                     </div>
                 `;
             } else {
-                // Show logged out view
-                loggedInView.style.display = 'none';
-                loggedOutView.style.display = 'block';
-                studentInfo.style.display = 'none';
+                // Redirect to login if authentication is lost
+                window.location.href = '../../index.html';
             }
         }
 

@@ -462,8 +462,13 @@
     <script src="src/assets/js/auth-utils.js"></script>
 
     <script>
-        // Initialize auth display on page load
+        // Check authentication and redirect if not logged in
         document.addEventListener('DOMContentLoaded', () => {
+            if (!authUtils.isAuthenticated()) {
+                // Redirect to login page if not authenticated
+                window.location.href = 'index.html';
+                return;
+            }
             updateAuthDisplay();
         });
 
@@ -488,9 +493,8 @@
                     teacherDashboardBtn.style.display = 'inline-block';
                 }
             } else {
-                // Show logged out view
-                loggedInView.classList.add('d-none');
-                loggedOutView.classList.remove('d-none');
+                // Redirect to login if authentication is lost
+                window.location.href = 'index.html';
             }
         }
 
