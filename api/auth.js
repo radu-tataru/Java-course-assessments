@@ -3,12 +3,56 @@
  * Handles user registration, login, and JWT token management
  */
 
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { createUser, getUserByEmail, getUserById } from './db.js';
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { sql } = require('@vercel/postgres');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 const JWT_EXPIRES_IN = '7d';
+
+// Database utility functions
+async function createUser(userData) {
+    try {
+        const result = await sql`
+            INSERT INTO users (email, password_hash, first_name, last_name, role, student_id)
+            VALUES (${userData.email}, ${userData.password_hash}, ${userData.first_name},
+                   ${userData.last_name}, ${userData.role || 'student'}, ${userData.student_id})
+            RETURNING id, email, first_name, last_name, role, student_id, created_at
+        `;
+        return result.rows[0];
+    } catch (error) {
+        if (error.code === '23505') { // Unique constraint violation
+            throw new Error('Email already exists');
+        }
+        throw error;
+    }
+}
+
+async function getUserByEmail(email) {
+    try {
+        const result = await sql`
+            SELECT id, email, password_hash, first_name, last_name, role, student_id, created_at
+            FROM users
+            WHERE email = ${email}
+        `;
+        return result.rows[0] || null;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getUserById(id) {
+    try {
+        const result = await sql`
+            SELECT id, email, first_name, last_name, role, student_id, created_at
+            FROM users
+            WHERE id = ${id}
+        `;
+        return result.rows[0] || null;
+    } catch (error) {
+        throw error;
+    }
+}
 
 // Helper function to generate JWT token
 function generateToken(user) {
@@ -24,7 +68,7 @@ function generateToken(user) {
 }
 
 // Middleware to verify JWT token
-export function verifyToken(req) {
+function verifyToken(req) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new Error('No token provided');
@@ -39,7 +83,7 @@ export function verifyToken(req) {
     }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -50,6 +94,7 @@ export default async function handler(req, res) {
         return;
     }
 
+    // Route based on URL path
     const { pathname } = new URL(req.url, `http://${req.headers.host}`);
     const endpoint = pathname.split('/').pop();
 
@@ -86,7 +131,7 @@ export default async function handler(req, res) {
         console.error('Auth API error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
 
 async function handleRegister(req, res) {
     try {
