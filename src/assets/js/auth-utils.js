@@ -53,22 +53,29 @@ class AuthUtils {
 
     // Verify token with server
     async verifyToken() {
+        console.log('AuthUtils: Verifying token...');
         if (!this.getToken()) {
+            console.log('AuthUtils: No token found');
             return false;
         }
 
         try {
+            console.log('AuthUtils: Making request to /api/auth-handler?action=verify');
             const response = await fetch(`${this.apiUrl}/auth-handler?action=verify`, {
                 headers: this.getAuthHeaders()
             });
 
+            console.log('AuthUtils: Response status:', response.status);
             const data = await response.json();
+            console.log('AuthUtils: Response data:', data);
 
             if (data.valid) {
+                console.log('AuthUtils: Token is valid');
                 // Update user data in case it changed
                 this.setAuthData(this.getToken(), data.user);
                 return true;
             } else {
+                console.log('AuthUtils: Token is invalid');
                 // Token is invalid, clear auth data
                 this.clearAuthData();
                 return false;

@@ -323,18 +323,23 @@
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                console.log('Dashboard: Checking authentication...');
                 // Check authentication
                 if (!authUtils.isAuthenticated()) {
+                    console.log('Dashboard: No auth data, redirecting to login...');
                     window.location.href = 'index.html';
                     return;
                 }
 
+                console.log('Dashboard: Found auth data, verifying token...');
                 // Verify token with server
                 const isValidToken = await authUtils.verifyToken();
                 if (!isValidToken) {
+                    console.log('Dashboard: Token invalid, redirecting to login...');
                     window.location.href = 'index.html';
                     return;
                 }
+                console.log('Dashboard: Token valid, loading dashboard...');
 
                 currentUser = authUtils.getUserData();
                 setupNavigation();

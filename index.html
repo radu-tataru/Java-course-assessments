@@ -292,10 +292,32 @@
 
     <script>
         // Check if already logged in and redirect
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Login page: Checking authentication...');
+
+            // Debug: Check if URL has clearAuth parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('clearAuth') === 'true') {
+                console.log('Login page: Clearing auth data as requested...');
+                authUtils.clearAuthData();
+                // Remove the parameter from URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
             if (authUtils.isAuthenticated()) {
-                window.location.href = 'dashboard.html';
-                return;
+                console.log('Login page: Found auth data, verifying token...');
+                // Verify token with server before redirecting
+                const isValidToken = await authUtils.verifyToken();
+                if (isValidToken) {
+                    console.log('Login page: Token valid, redirecting to dashboard...');
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+                // If token is invalid, clear auth data and stay on login page
+                console.log('Login page: Token invalid, clearing auth data...');
+                authUtils.clearAuthData();
+            } else {
+                console.log('Login page: No auth data found, showing login form...');
             }
         });
 
