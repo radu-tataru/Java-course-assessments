@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Analytics</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+</head>
+<body style="background: white; padding: 0; margin: 0;">
+    <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-gradient text-white" style="background: var(--bg-gradient);">
+                    <div class="card-body py-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="mb-2">
+                                    <i class="bi bi-graph-up me-2"></i>
+                                    Class Analytics
+                                </h2>
+                                <p class="lead mb-0">Monitor student performance and class progress</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <button class="btn btn-light btn-sm" onclick="exportAnalytics()">
+                                    <i class="bi bi-download me-1"></i>Export Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-primary mb-2">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="totalStudents">-</h5>
+                        <small class="text-muted">Total Students</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-success mb-2">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="completedAssessments">-</h5>
+                        <small class="text-muted">Completed Assessments</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-warning mb-2">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="pendingReviews">-</h5>
+                        <small class="text-muted">Pending Reviews</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-info mb-2">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="averageScore">-</h5>
+                        <small class="text-muted">Class Average</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Performance Charts -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart me-2"></i>Assessment Performance Trends
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="performanceChart" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-graph-up display-1"></i>
+                                <h5 class="mt-3">Performance Trends</h5>
+                                <p>Analytics chart will appear here as students complete more assessments.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart me-2"></i>Score Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="scoreDistribution">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Excellent (90-100%)</span>
+                                    <span class="text-success" id="excellentCount">0</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: 0%" id="excellentBar"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Good (80-89%)</span>
+                                    <span class="text-info" id="goodCount">0</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-info" style="width: 0%" id="goodBar"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Satisfactory (70-79%)</span>
+                                    <span class="text-warning" id="satisfactoryCount">0</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: 0%" id="satisfactoryBar"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Needs Improvement (<70%)</span>
+                                    <span class="text-danger" id="needsImprovementCount">0</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-danger" style="width: 0%" id="needsImprovementBar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Progress Overview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clipboard-check me-2"></i>Assessment Progress Overview
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="assessmentProgress">
+                            <div class="text-center text-muted py-4">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2">Loading assessment progress...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performers and Recent Activity -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-award me-2"></i>Top Performers
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="topPerformers">
+                            <div class="text-center text-muted py-3">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2">Loading top performers...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>Recent Activity
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <div class="text-center text-muted py-3">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2">Loading recent activity...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Authentication Utils -->
+    <script src="../assets/js/auth-utils.js"></script>
+
+    <script>
+        // Load analytics data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAnalyticsData();
+        });
+
+        async function loadAnalyticsData() {
+            try {
+                if (!authUtils.isAuthenticated()) {
+                    window.location.href = '../../index.html';
+                    return;
+                }
+
+                // Load analytics data
+                const [statsResponse, activityResponse] = await Promise.all([
+                    fetch('/api/stats', {
+                        headers: {
+                            'Authorization': `Bearer ${authUtils.getToken()}`
+                        }
+                    }),
+                    fetch('/api/recent-activity', {
+                        headers: {
+                            'Authorization': `Bearer ${authUtils.getToken()}`
+                        }
+                    })
+                ]);
+
+                if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    updateStats(statsData);
+                    updateScoreDistribution(statsData);
+                }
+
+                if (activityResponse.ok) {
+                    const activityData = await activityResponse.json();
+                    updateRecentActivity(activityData.activities || []);
+                    updateTopPerformers(activityData.topPerformers || []);
+                }
+
+                // Load assessment progress
+                await loadAssessmentProgress();
+
+            } catch (error) {
+                console.error('Failed to load analytics data:', error);
+                showError('Failed to load analytics data. Some features may not be available.');
+            }
+        }
+
+        function updateStats(data) {
+            document.getElementById('totalStudents').textContent = data.totalStudents || 0;
+            document.getElementById('completedAssessments').textContent = data.completedAssessments || 0;
+            document.getElementById('pendingReviews').textContent = data.pendingReviews || 0;
+            document.getElementById('averageScore').textContent = data.averageScore ? `${data.averageScore}%` : '-';
+        }
+
+        function updateScoreDistribution(data) {
+            // Mock data for demonstration - replace with real data
+            const distribution = data.scoreDistribution || {
+                excellent: 2,
+                good: 5,
+                satisfactory: 3,
+                needsImprovement: 1
+            };
+
+            const total = Object.values(distribution).reduce((a, b) => a + b, 0);
+
+            if (total > 0) {
+                document.getElementById('excellentCount').textContent = distribution.excellent;
+                document.getElementById('excellentBar').style.width = `${(distribution.excellent / total) * 100}%`;
+
+                document.getElementById('goodCount').textContent = distribution.good;
+                document.getElementById('goodBar').style.width = `${(distribution.good / total) * 100}%`;
+
+                document.getElementById('satisfactoryCount').textContent = distribution.satisfactory;
+                document.getElementById('satisfactoryBar').style.width = `${(distribution.satisfactory / total) * 100}%`;
+
+                document.getElementById('needsImprovementCount').textContent = distribution.needsImprovement;
+                document.getElementById('needsImprovementBar').style.width = `${(distribution.needsImprovement / total) * 100}%`;
+            }
+        }
+
+        function updateRecentActivity(activities) {
+            const recentActivity = document.getElementById('recentActivity');
+
+            if (activities.length === 0) {
+                recentActivity.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-clock-history"></i>
+                        <div class="mt-2">No recent activity</div>
+                    </div>
+                `;
+                return;
+            }
+
+            recentActivity.innerHTML = activities.slice(0, 5).map(activity => {
+                const timeAgo = getTimeAgo(activity.timestamp);
+                return `
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-person text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">${activity.studentName}</div>
+                            <div class="text-muted small">${activity.action}</div>
+                            <div class="text-muted small">${timeAgo}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateTopPerformers(performers) {
+            const topPerformers = document.getElementById('topPerformers');
+
+            if (performers.length === 0) {
+                topPerformers.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-award"></i>
+                        <div class="mt-2">No performance data yet</div>
+                    </div>
+                `;
+                return;
+            }
+
+            topPerformers.innerHTML = performers.slice(0, 5).map((performer, index) => {
+                const rankIcon = index === 0 ? 'bi-trophy-fill text-warning' :
+                                index === 1 ? 'bi-award-fill text-secondary' :
+                                index === 2 ? 'bi-award text-warning' : 'bi-star';
+
+                return `
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <i class="bi ${rankIcon}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">${performer.name}</div>
+                            <div class="text-muted small">${performer.completedAssessments} assessments</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success">${performer.averageScore}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadAssessmentProgress() {
+            try {
+                const response = await fetch('/api/assessment-overview', {
+                    headers: {
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load assessment progress');
+                }
+
+                const data = await response.json();
+                updateAssessmentProgress(data.assessments || []);
+
+            } catch (error) {
+                console.error('Failed to load assessment progress:', error);
+                document.getElementById('assessmentProgress').innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <div class="mt-2">Failed to load assessment progress</div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateAssessmentProgress(assessments) {
+            const assessmentProgress = document.getElementById('assessmentProgress');
+
+            if (assessments.length === 0) {
+                assessmentProgress.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-clipboard-x"></i>
+                        <div class="mt-2">No assessment data available</div>
+                    </div>
+                `;
+                return;
+            }
+
+            assessmentProgress.innerHTML = `
+                <div class="row">
+                    ${assessments.map(assessment => `
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-0 bg-light h-100">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Step ${assessment.step}</h6>
+                                    <p class="card-text small text-muted">${assessment.title}</p>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="fw-bold text-primary">${assessment.completedCount || 0}</div>
+                                            <small class="text-muted">Completed</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="fw-bold text-success">${assessment.averageScore || 0}%</div>
+                                            <small class="text-muted">Avg Score</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getTimeAgo(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+
+            if (diffInMinutes < 60) {
+                return `${diffInMinutes} minutes ago`;
+            } else if (diffInMinutes < 1440) {
+                return `${Math.floor(diffInMinutes / 60)} hours ago`;
+            } else {
+                return `${Math.floor(diffInMinutes / 1440)} days ago`;
+            }
+        }
+
+        function exportAnalytics() {
+            // Implement analytics export functionality
+            console.log('Exporting analytics report...');
+            // This could generate a PDF or CSV report
+        }
+
+        function showError(message) {
+            console.error(message);
+            // Optionally show a toast or alert
+        }
+    </script>
+</body>
+</html>

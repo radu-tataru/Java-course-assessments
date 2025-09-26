@@ -45,49 +45,36 @@
             </div>
         </div>
 
-        <!-- Quick Stats -->
+        <!-- Course Overview -->
         <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-center">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-body">
-                        <div class="display-6 text-primary mb-2">
-                            <i class="bi bi-people"></i>
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-book me-2"></i>Java Course Assessment System
+                        </h5>
+                        <p class="card-text">
+                            Welcome to your teaching dashboard! Monitor student progress, manage assessments, and track class performance.
+                            Use the navigation menu to access different sections of the system.
+                        </p>
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <i class="bi bi-people-fill text-primary me-2"></i>
+                                <small>Student management</small>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <i class="bi bi-file-text-fill text-success me-2"></i>
+                                <small>Assessment monitoring</small>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <i class="bi bi-graph-up-arrow text-info me-2"></i>
+                                <small>Progress analytics</small>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <i class="bi bi-download text-warning me-2"></i>
+                                <small>Report generation</small>
+                            </div>
                         </div>
-                        <h5 class="card-title mb-1" id="totalStudents">-</h5>
-                        <small class="text-muted">Total Students</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="display-6 text-success mb-2">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <h5 class="card-title mb-1" id="completedAssessments">-</h5>
-                        <small class="text-muted">Completed Assessments</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="display-6 text-warning mb-2">
-                            <i class="bi bi-clock"></i>
-                        </div>
-                        <h5 class="card-title mb-1" id="pendingReviews">-</h5>
-                        <small class="text-muted">Pending Reviews</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="display-6 text-info mb-2">
-                            <i class="bi bi-trophy"></i>
-                        </div>
-                        <h5 class="card-title mb-1" id="averageScore">-</h5>
-                        <small class="text-muted">Class Average</small>
                     </div>
                 </div>
             </div>
@@ -136,28 +123,6 @@
             </div>
         </div>
 
-        <!-- Assessment Progress Overview -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bi bi-bar-chart me-2"></i>Assessment Progress Overview
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="assessmentProgress">
-                            <div class="text-center text-muted py-4">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <div class="mt-2">Loading assessment progress...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Quick Actions -->
         <div class="row">
@@ -233,24 +198,12 @@
                     return;
                 }
 
-                // Load dashboard statistics
-                const [statsResponse, activityResponse] = await Promise.all([
-                    fetch('/api/stats', {
-                        headers: {
-                            'Authorization': `Bearer ${authUtils.getToken()}`
-                        }
-                    }),
-                    fetch('/api/recent-activity', {
-                        headers: {
-                            'Authorization': `Bearer ${authUtils.getToken()}`
-                        }
-                    })
-                ]);
-
-                if (statsResponse.ok) {
-                    const statsData = await statsResponse.json();
-                    updateStats(statsData);
-                }
+                // Load recent activity for the home overview
+                const activityResponse = await fetch('/api/recent-activity', {
+                    headers: {
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    }
+                });
 
                 if (activityResponse.ok) {
                     const activityData = await activityResponse.json();
@@ -258,20 +211,10 @@
                     updateTopPerformers(activityData.topPerformers || []);
                 }
 
-                // Load assessment progress
-                await loadAssessmentProgress();
-
             } catch (error) {
                 console.error('Failed to load dashboard data:', error);
                 showError('Failed to load dashboard data. Some features may not be available.');
             }
-        }
-
-        function updateStats(data) {
-            document.getElementById('totalStudents').textContent = data.totalStudents || 0;
-            document.getElementById('completedAssessments').textContent = data.completedAssessments || 0;
-            document.getElementById('pendingReviews').textContent = data.pendingReviews || 0;
-            document.getElementById('averageScore').textContent = data.averageScore ? `${data.averageScore}%` : '-';
         }
 
         function updateRecentActivity(activities) {
@@ -341,70 +284,6 @@
             }).join('');
         }
 
-        async function loadAssessmentProgress() {
-            try {
-                const response = await fetch('/api/assessment-overview', {
-                    headers: {
-                        'Authorization': `Bearer ${authUtils.getToken()}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to load assessment progress');
-                }
-
-                const data = await response.json();
-                updateAssessmentProgress(data.assessments || []);
-
-            } catch (error) {
-                console.error('Failed to load assessment progress:', error);
-                document.getElementById('assessmentProgress').innerHTML = `
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <div class="mt-2">Failed to load assessment progress</div>
-                    </div>
-                `;
-            }
-        }
-
-        function updateAssessmentProgress(assessments) {
-            const assessmentProgress = document.getElementById('assessmentProgress');
-
-            if (assessments.length === 0) {
-                assessmentProgress.innerHTML = `
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-clipboard-x"></i>
-                        <div class="mt-2">No assessment data available</div>
-                    </div>
-                `;
-                return;
-            }
-
-            assessmentProgress.innerHTML = `
-                <div class="row">
-                    ${assessments.map(assessment => `
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body text-center">
-                                    <h6 class="card-title">Step ${assessment.step}</h6>
-                                    <p class="card-text small text-muted">${assessment.title}</p>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <div class="fw-bold text-primary">${assessment.completedCount || 0}</div>
-                                            <small class="text-muted">Completed</small>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="fw-bold text-success">${assessment.averageScore || 0}%</div>
-                                            <small class="text-muted">Avg Score</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
 
         function getTimeAgo(timestamp) {
             const date = new Date(timestamp);

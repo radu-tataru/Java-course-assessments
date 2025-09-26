@@ -38,6 +38,54 @@
             </div>
         </div>
 
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-primary mb-2">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="assessmentsAvailable">3</h5>
+                        <small class="text-muted">Assessments Available</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-success mb-2">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="assessmentsCompleted">0</h5>
+                        <small class="text-muted">Completed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-warning mb-2">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="averageScore">-</h5>
+                        <small class="text-muted">Average Score</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-info mb-2">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="timeSpent">0h</h5>
+                        <small class="text-muted">Time Spent</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Progress Overview -->
         <div class="row mb-4">
             <div class="col-md-6">
@@ -61,18 +109,18 @@
                         <div class="row text-center">
                             <div class="col-4">
                                 <div class="border-end">
-                                    <div class="h4 text-primary mb-1" id="completedAssessments">0</div>
+                                    <div class="h4 text-primary mb-1" id="completedAssessments2">0</div>
                                     <small class="text-muted">Completed</small>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="border-end">
-                                    <div class="h4 text-warning mb-1" id="averageScore">0%</div>
+                                    <div class="h4 text-warning mb-1" id="averageScore2">0%</div>
                                     <small class="text-muted">Avg Score</small>
                                 </div>
                             </div>
                             <div class="col-4">
-                                <div class="h4 text-info mb-1" id="totalTime">0h</div>
+                                <div class="h4 text-info mb-1" id="totalTime2">0h</div>
                                 <small class="text-muted">Study Time</small>
                             </div>
                         </div>
@@ -197,11 +245,17 @@
             const completedCount = data.completed_assessments || 0;
             const overallPercent = Math.round((completedCount / totalAssessments) * 100);
 
-            document.getElementById('overallPercent').textContent = `${overallPercent}%`;
-            document.getElementById('overallProgress').style.width = `${overallPercent}%`;
-            document.getElementById('completedAssessments').textContent = completedCount;
+            // Update quick stats
+            document.getElementById('assessmentsCompleted').textContent = completedCount;
             document.getElementById('averageScore').textContent = `${data.average_score || 0}%`;
             document.getElementById('totalTime').textContent = formatTotalTime(data.total_time || 0);
+
+            // Update progress overview
+            document.getElementById('overallPercent').textContent = `${overallPercent}%`;
+            document.getElementById('overallProgress').style.width = `${overallPercent}%`;
+            document.getElementById('completedAssessments2').textContent = completedCount;
+            document.getElementById('averageScore2').textContent = `${data.average_score || 0}%`;
+            document.getElementById('totalTime2').textContent = formatTotalTime(data.total_time || 0);
         }
 
         function updateRecentActivity(attempts) {
