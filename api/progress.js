@@ -49,15 +49,15 @@ async function getStudentProgress(userId = null) {
 
             return result.rows.map(row => ({
                 id: row.id,
-                firstName: row.first_name,
-                lastName: row.last_name,
+                first_name: row.first_name,
+                last_name: row.last_name,
                 email: row.email,
-                studentId: row.student_id,
-                registeredAt: row.registered_at,
-                totalAttempts: parseInt(row.total_attempts),
-                completedAttempts: parseInt(row.completed_attempts),
-                avgScore: parseFloat(row.avg_score).toFixed(1),
-                lastActivity: row.last_activity
+                student_id: row.student_id,
+                registered_at: row.registered_at,
+                assessments_taken: parseInt(row.total_attempts),
+                completed_attempts: parseInt(row.completed_attempts),
+                avg_score: parseFloat(row.avg_score).toFixed(1),
+                last_submission: row.last_activity
             }));
         } else {
             // Get progress for all students - first get basic user data
@@ -78,15 +78,15 @@ async function getStudentProgress(userId = null) {
             // TODO: Implement assessment_attempts table join when it has data
             return result.rows.map(row => ({
                 id: row.id,
-                firstName: row.first_name,
-                lastName: row.last_name,
+                first_name: row.first_name,
+                last_name: row.last_name,
                 email: row.email,
-                studentId: row.student_id,
-                registeredAt: row.registered_at,
-                totalAttempts: 0,
-                completedAttempts: 0,
-                avgScore: '0.0',
-                lastActivity: null
+                student_id: row.student_id,
+                registered_at: row.registered_at,
+                assessments_taken: 0,
+                completed_attempts: 0,
+                avg_score: '0.0',
+                last_submission: null
             }));
         }
     } catch (error) {
