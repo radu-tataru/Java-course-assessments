@@ -6,7 +6,13 @@
     "api/submissions.js": {
       "maxDuration": 30
     },
-    "api/auth.js": {
+    "api/auth/register.js": {
+      "maxDuration": 30
+    },
+    "api/auth/login.js": {
+      "maxDuration": 30
+    },
+    "api/auth/verify.js": {
       "maxDuration": 30
     },
     "api/assessments.js": {
