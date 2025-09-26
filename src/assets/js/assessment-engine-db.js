@@ -470,6 +470,10 @@ class DatabaseAssessmentEngine {
                 })
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -506,9 +510,13 @@ class DatabaseAssessmentEngine {
                 method: 'POST',
                 body: JSON.stringify({
                     attemptId: this.attemptData.id,
-                    totalTimeSpent: totalTimeSpent
+                    timeSpent: totalTimeSpent
                 })
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
             const data = await response.json();
 
