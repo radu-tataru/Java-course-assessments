@@ -3,16 +3,13 @@
   "outputDirectory": ".",
   "installCommand": "npm install",
   "functions": {
+    "api/auth-handler.js": {
+      "maxDuration": 30
+    },
+    "api/assessment-handler.js": {
+      "maxDuration": 30
+    },
     "api/submissions.js": {
-      "maxDuration": 30
-    },
-    "api/auth/register.js": {
-      "maxDuration": 30
-    },
-    "api/auth/login.js": {
-      "maxDuration": 30
-    },
-    "api/auth/verify.js": {
       "maxDuration": 30
     },
     "api/assessments.js": {
@@ -31,6 +28,9 @@
       "maxDuration": 30
     },
     "api/users.js": {
+      "maxDuration": 30
+    },
+    "api/user-attempts.js": {
       "maxDuration": 30
     }
   },
