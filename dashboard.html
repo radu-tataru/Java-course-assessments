@@ -329,6 +329,13 @@
                     return;
                 }
 
+                // Verify token with server
+                const isValidToken = await authUtils.verifyToken();
+                if (!isValidToken) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
                 currentUser = authUtils.getUserData();
                 setupNavigation();
                 updateUserInfo();

@@ -58,13 +58,13 @@ class AuthUtils {
         }
 
         try {
-            const response = await fetch(`${this.apiUrl}/auth/verify`, {
+            const response = await fetch(`${this.apiUrl}/auth-handler?action=verify`, {
                 headers: this.getAuthHeaders()
             });
 
             const data = await response.json();
 
-            if (data.success) {
+            if (data.valid) {
                 // Update user data in case it changed
                 this.setAuthData(this.getToken(), data.user);
                 return true;
@@ -82,13 +82,13 @@ class AuthUtils {
     // Logout user
     async logout() {
         this.clearAuthData();
-        window.location.href = '/src/auth/login.html';
+        window.location.href = 'index.html';
     }
 
     // Redirect to login if not authenticated
     requireAuth() {
         if (!this.isAuthenticated()) {
-            window.location.href = '/src/auth/login.html';
+            window.location.href = 'index.html';
             return false;
         }
         return true;
@@ -176,14 +176,16 @@ class AuthUtils {
     }
 
     // Initialize auth check on page load
-    async initAuth() {
+    async initAuth(autoRedirect = false) {
         if (this.isAuthenticated()) {
             const isValid = await this.verifyToken();
-            if (!isValid) {
-                // Redirect to login if token is invalid
-                window.location.href = '/src/auth/login.html';
+            if (!isValid && autoRedirect) {
+                // Redirect to login if token is invalid and autoRedirect is enabled
+                window.location.href = 'index.html';
             }
+            return isValid;
         }
+        return false;
     }
 
     // Make authenticated API request
@@ -199,7 +201,7 @@ class AuthUtils {
             if (response.status === 401) {
                 // Token expired or invalid
                 this.clearAuthData();
-                window.location.href = '/src/auth/login.html';
+                window.location.href = 'index.html';
                 throw new Error('Authentication required');
             }
 
@@ -232,10 +234,10 @@ class AuthUtils {
 // Create global instance
 const authUtils = new AuthUtils();
 
-// Auto-initialize on DOM load
-document.addEventListener('DOMContentLoaded', () => {
-    authUtils.initAuth();
-});
+// Auto-initialize on DOM load (disabled to prevent redirect loops)
+// document.addEventListener('DOMContentLoaded', () => {
+//     authUtils.initAuth();
+// });
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
