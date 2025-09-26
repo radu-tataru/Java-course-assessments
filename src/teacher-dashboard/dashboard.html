@@ -718,7 +718,7 @@
 
         async function loadOverviewStats() {
             try {
-                const response = await authUtils.apiRequest('/api/assessments/stats');
+                const response = await authUtils.apiRequest('/api/stats');
                 const data = await response.json();
 
                 if (data.success) {
@@ -742,7 +742,7 @@
 
         async function loadStudentData() {
             try {
-                const response = await authUtils.apiRequest('/api/assessments/progress');
+                const response = await authUtils.apiRequest('/api/progress');
                 const data = await response.json();
 
                 if (data.success) {

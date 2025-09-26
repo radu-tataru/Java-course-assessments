@@ -3,22 +3,28 @@
  * Handles assessment management, attempts, and submissions
  */
 
-import {
-    getAllAssessments,
-    getAssessmentById,
-    getAssessmentByStep,
-    getQuestionsByAssessment,
-    createAssessmentAttempt,
-    getAssessmentAttempt,
-    updateAssessmentAttempt,
-    saveQuestionResponse,
-    getStudentProgress,
-    getAssessmentStats,
-    initializeDatabase
-} from './db.js';
-import { verifyToken } from './auth.js';
+const jwt = require('jsonwebtoken');
+const { sql } = require('@vercel/postgres');
 
-export default async function handler(req, res) {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+
+// Function to verify JWT token
+function verifyToken(req) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new Error('No token provided');
+    }
+
+    const token = authHeader.substring(7);
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        return decoded;
+    } catch (error) {
+        throw new Error('Invalid token');
+    }
+}
+
+module.exports = async function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
@@ -29,9 +35,10 @@ export default async function handler(req, res) {
         return;
     }
 
-    const { pathname, searchParams } = new URL(req.url, `http://${req.headers.host}`);
-    const pathParts = pathname.split('/').filter(Boolean);
-    const endpoint = pathParts[pathParts.length - 1];
+    // For simplicity, let's handle direct endpoint calls
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const searchParams = url.searchParams;
+    const endpoint = searchParams.get('endpoint') || 'list';
 
     try {
         // Initialize database on first request

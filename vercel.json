@@ -20,6 +20,12 @@
     },
     "api/init-db.js": {
       "maxDuration": 60
+    },
+    "api/stats.js": {
+      "maxDuration": 30
+    },
+    "api/progress.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
