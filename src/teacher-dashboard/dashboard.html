@@ -323,6 +323,9 @@
             <li><a href="#reports" class="nav-link" data-section="reports">
                 <i class="bi bi-download"></i>Reports
             </a></li>
+            <li id="userManagementNav" style="display: none;"><a href="#users" class="nav-link" data-section="users">
+                <i class="bi bi-person-gear"></i>User Management
+            </a></li>
         </ul>
 
         <div class="sidebar-footer">
@@ -570,6 +573,145 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- User Management Section (Admin Only) -->
+                    <div id="users-section" class="content-section" style="display: none;">
+                        <div class="section-header">
+                            <h4><i class="bi bi-person-gear me-2"></i>User Management</h4>
+                            <p class="text-muted">Manage user accounts, roles, and permissions</p>
+                        </div>
+
+                        <!-- User Statistics Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="stat-icon bg-primary mb-2">
+                                            <i class="bi bi-people"></i>
+                                        </div>
+                                        <h5 class="mb-1" id="totalUsersCount">0</h5>
+                                        <small class="text-muted">Total Users</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="stat-icon bg-success mb-2">
+                                            <i class="bi bi-person-check"></i>
+                                        </div>
+                                        <h5 class="mb-1" id="studentsCount">0</h5>
+                                        <small class="text-muted">Students</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="stat-icon bg-warning mb-2">
+                                            <i class="bi bi-person-badge"></i>
+                                        </div>
+                                        <h5 class="mb-1" id="teachersCount">0</h5>
+                                        <small class="text-muted">Teachers</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="stat-icon bg-danger mb-2">
+                                            <i class="bi bi-shield-lock"></i>
+                                        </div>
+                                        <h5 class="mb-1" id="adminsCount">0</h5>
+                                        <small class="text-muted">Admins</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add User Section -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-person-plus me-2"></i>Add New User
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="addUserForm" class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="newUserFirstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="newUserFirstName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="newUserLastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="newUserLastName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="newUserEmail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="newUserEmail" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="newUserRole" class="form-label">Role</label>
+                                        <select class="form-select" id="newUserRole" required>
+                                            <option value="student">Student</option>
+                                            <option value="teacher">Teacher</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="newUserStudentId" class="form-label">Student ID (Optional)</label>
+                                        <input type="text" class="form-control" id="newUserStudentId">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="newUserPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="newUserPassword" required>
+                                        <div class="form-text">Minimum 6 characters</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-person-plus me-1"></i>Add User
+                                        </button>
+                                        <button type="reset" class="btn btn-secondary ms-2">Reset</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Users Table -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-people me-2"></i>All Users
+                                </h6>
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadAllUsers()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Email</th>
+                                                <th>Role</th>
+                                                <th>Student ID</th>
+                                                <th>Created</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="usersTableBody">
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted py-4">
+                                                    <i class="bi bi-hourglass-split me-2"></i>Loading users...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -659,6 +801,14 @@
                     </div>
                 </div>
             `;
+
+            // Show user management navigation for admin users only
+            if (userData.role === 'admin') {
+                const userManagementNav = document.getElementById('userManagementNav');
+                if (userManagementNav) {
+                    userManagementNav.style.display = 'block';
+                }
+            }
         }
 
         function setupNavigation() {
@@ -679,7 +829,7 @@
         }
 
         function showSection(sectionName) {
-            const sections = ['overview', 'students', 'assessments', 'analytics', 'reports'];
+            const sections = ['overview', 'students', 'assessments', 'analytics', 'reports', 'users'];
             sections.forEach(name => {
                 const element = document.getElementById(`${name}-section`);
                 if (element) {
@@ -697,6 +847,9 @@
                     break;
                 case 'analytics':
                     loadAnalyticsData();
+                    break;
+                case 'users':
+                    loadUserManagementData();
                     break;
             }
         }
@@ -891,6 +1044,181 @@
 
         function exportAnalyticsReport() {
             console.log('Exporting analytics report...');
+        }
+
+        // User Management Functions
+        async function loadUserManagementData() {
+            try {
+                await loadAllUsers();
+                await loadUserStats();
+            } catch (error) {
+                console.error('Failed to load user management data:', error);
+                showError('Failed to load user management data');
+            }
+        }
+
+        async function loadAllUsers() {
+            try {
+                const response = await authUtils.apiRequest('/api/users');
+                const data = await response.json();
+
+                if (data.success) {
+                    renderUsersTable(data.users);
+                } else {
+                    showError('Failed to load users');
+                }
+            } catch (error) {
+                console.error('Failed to load users:', error);
+                showError('Failed to load users');
+            }
+        }
+
+        async function loadUserStats() {
+            try {
+                const response = await authUtils.apiRequest('/api/users/stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.stats;
+                    document.getElementById('totalUsersCount').textContent = stats.total || 0;
+                    document.getElementById('studentsCount').textContent = stats.students || 0;
+                    document.getElementById('teachersCount').textContent = stats.teachers || 0;
+                    document.getElementById('adminsCount').textContent = stats.admins || 0;
+                }
+            } catch (error) {
+                console.error('Failed to load user stats:', error);
+            }
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No users found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => {
+                const initials = `${user.first_name[0]}${user.last_name[0]}`;
+                const createdDate = new Date(user.created_at).toLocaleDateString();
+                const roleColor = {
+                    'admin': 'danger',
+                    'teacher': 'warning',
+                    'student': 'success'
+                }[user.role] || 'secondary';
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-light text-primary me-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem; font-weight: 600;">
+                                    ${initials}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">${user.first_name} ${user.last_name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${user.email}</td>
+                        <td><span class="badge bg-${roleColor}">${user.role.toUpperCase()}</span></td>
+                        <td>${user.student_id || 'N/A'}</td>
+                        <td>${createdDate}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="editUser(${user.id})" title="Edit User">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="deleteUser(${user.id}, '${user.first_name} ${user.last_name}')" title="Delete User">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Handle add user form submission
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Adding...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await authUtils.apiRequest('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        firstName: formData.get('newUserFirstName'),
+                        lastName: formData.get('newUserLastName'),
+                        email: formData.get('newUserEmail'),
+                        password: formData.get('newUserPassword'),
+                        role: formData.get('newUserRole'),
+                        studentId: formData.get('newUserStudentId') || null
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('User created successfully!', 'success');
+                    e.target.reset();
+                    await loadAllUsers();
+                    await loadUserStats();
+                } else {
+                    showError(data.error || 'Failed to create user');
+                }
+            } catch (error) {
+                console.error('Create user error:', error);
+                showError('Failed to create user');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        async function editUser(userId) {
+            // TODO: Implement edit user functionality
+            console.log('Edit user:', userId);
+            showAlert('Edit user functionality coming soon!', 'info');
+        }
+
+        async function deleteUser(userId, userName) {
+            if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await authUtils.apiRequest(`/api/users/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(`User "${userName}" deleted successfully!`, 'success');
+                    await loadAllUsers();
+                    await loadUserStats();
+                } else {
+                    showError(data.error || 'Failed to delete user');
+                }
+            } catch (error) {
+                console.error('Delete user error:', error);
+                showError('Failed to delete user');
+            }
         }
     </script>
 </body>
