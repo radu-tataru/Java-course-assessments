@@ -10,214 +10,284 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Code highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-    <!-- CodeMirror for syntax highlighting in textarea -->
+    <!-- CodeMirror for code editor -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/matchbrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/fold/foldcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/fold/foldgutter.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/fold/brace-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/selection/active-line.min.js"></script>
-
-    <style>
-        .CodeMirror {
-            border: 1px solid #dee2e6;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            border-radius: 0.375rem;
-        }
-        .CodeMirror-focused {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        .CodeMirror-gutters {
-            background-color: #f8f9fa;
-            border-right: 1px solid #e9ecef;
-        }
-        .CodeMirror-linenumber {
-            color: #6c757d;
-        }
-    </style>
 
     <!-- Custom Styles -->
     <link href="../assets/css/assessment-styles.css" rel="stylesheet">
 
     <style>
+        .assessment-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
         .student-info {
             background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .instructions {
-            background: linear-gradient(135deg, #e0f2fe 0%, #f3e5f5 100%);
-            border-left: 4px solid var(--primary-color);
+            border-radius: 12px;
             padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
-            border-radius: 8px;
-        }
-
-        .time-remaining {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--primary-color);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .assessment-container {
-            max-width: 900px;
-            margin: 0 auto;
+            border-left: 4px solid var(--primary-color);
         }
 
         .welcome-screen {
             text-align: center;
-            padding: 3rem 2rem;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
-        .welcome-screen .icon {
+        .welcome-icon {
             font-size: 4rem;
             color: var(--primary-color);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .start-button {
             background: var(--success-color);
             border: none;
-            padding: 1rem 2rem;
-            border-radius: 8px;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
             color: white;
             font-size: 1.1rem;
             font-weight: 600;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
         }
 
         .start-button:hover {
             background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .timer-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 1050;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .progress-indicator {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .code-snippet {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .form-check-input:checked + .form-check-label {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .question-actions {
+            border-top: 1px solid #e9ecef;
+            padding-top: 2rem;
+            margin-top: 2rem;
+        }
+
+        .CodeMirror {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .CodeMirror-focused {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .execution-result {
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+        }
+
+        .execution-success {
+            background-color: #d1edff;
+            border: 1px solid #0dcaf0;
+            color: #055160;
+        }
+
+        .execution-error {
+            background-color: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
         }
 
         @media (max-width: 768px) {
-            .time-remaining {
-                position: static;
-                margin-bottom: 1rem;
-                display: block;
-                text-align: center;
-            }
-
             .assessment-container {
                 padding: 1rem;
             }
+
+            .timer-container {
+                position: static;
+                margin-bottom: 1rem;
+                text-align: center;
+                display: block;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+        }
+
+        .btn-auth-required {
+            background: var(--warning-color);
+            border: none;
+            color: white;
+        }
+
+        .alert-auth {
+            border-radius: 12px;
+            border: none;
+            padding: 1.5rem;
         }
     </style>
 </head>
 <body>
-    <!-- Assessment Header -->
-    <div class="assessment-header">
-        <div class="container">
-            <div class="assessment-container">
-                <h1 class="assessment-title">
-                    <i class="bi bi-file-text me-2"></i>
-                    Step 1: Basic File Reading Assessment
-                </h1>
-                <p class="assessment-subtitle">
-                    Test your understanding of Java file I/O operations and data parsing
-                </p>
+    <!-- Timer -->
+    <div class="timer-container" id="timerContainer">
+        <i class="bi bi-clock me-2"></i>
+        <span id="timerDisplay">30:00</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="assessment-container">
+        <!-- Student Info (shown when authenticated) -->
+        <div class="student-info" id="studentInfo" style="display: none;">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h6 class="mb-1">Student Information</h6>
+                    <div id="studentDetails"></div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <button class="btn btn-outline-danger btn-sm" onclick="authUtils.logout()">
+                        <i class="bi bi-box-arrow-right me-1"></i>Logout
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Time Remaining (will be shown during assessment) -->
-    <div class="time-remaining" id="time-remaining" style="display: none;">
-        <i class="bi bi-clock me-1"></i>
-        <span id="time-text">30:00</span>
-    </div>
-
-    <div class="container">
-        <div class="assessment-container">
-            <!-- Progress Bar (will be shown during assessment) -->
-            <div class="progress-container" id="progress-container" style="display: none;">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="progress-text" id="progress-text">Question 1 of 10</div>
+        <!-- Progress Indicator (shown during assessment) -->
+        <div class="progress-indicator" id="progressIndicator" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-semibold" id="progressText">Question 1 of 10</span>
+                <span class="text-muted" id="progressPercent">10%</span>
             </div>
+            <div class="progress-bar-custom">
+                <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
+            </div>
+        </div>
 
-            <!-- Welcome Screen -->
-            <div id="welcome-screen" class="welcome-screen">
-                <div class="question-card">
-                    <div class="question-content">
-                        <div class="icon">
-                            <i class="bi bi-clipboard-check"></i>
-                        </div>
-                        <h3>Ready to Start Your Assessment?</h3>
-                        <p class="lead">This assessment covers the concepts from <strong>Step 1: Basic File Reading</strong></p>
+        <!-- Assessment Content -->
+        <div id="assessmentContent">
+            <!-- Welcome Screen (default) -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h1 class="h2 mb-3">Step 1: Basic File Reading Assessment</h1>
+                <p class="lead text-muted mb-4">
+                    Test your understanding of Java file I/O operations, BufferedReader usage, and data parsing from TXT, CSV, and JSON files.
+                </p>
 
-                        <div class="row text-start mt-4">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-info-circle me-2 text-primary"></i>Assessment Details:</h6>
-                                <ul class="list-unstyled ms-4">
-                                    <li><i class="bi bi-check text-success me-2"></i>10 Questions</li>
-                                    <li><i class="bi bi-check text-success me-2"></i>30 Minutes Time Limit</li>
-                                    <li><i class="bi bi-check text-success me-2"></i>70% to Pass</li>
-                                    <li><i class="bi bi-check text-success me-2"></i>Multiple Attempts Allowed</li>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Assessment Details</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-clock text-primary me-2"></i>Duration: 30 minutes</li>
+                                    <li><i class="bi bi-question-circle text-primary me-2"></i>Questions: 10 questions</li>
+                                    <li><i class="bi bi-award text-primary me-2"></i>Passing Score: 70%</li>
+                                    <li><i class="bi bi-shield-check text-primary me-2"></i>Auto-save enabled</li>
                                 </ul>
                             </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-lightbulb me-2 text-warning"></i>Question Types:</h6>
-                                <ul class="list-unstyled ms-4">
-                                    <li><i class="bi bi-dot"></i>Multiple Choice</li>
-                                    <li><i class="bi bi-dot"></i>Code Reading</li>
-                                    <li><i class="bi bi-dot"></i>Code Completion</li>
-                                    <li><i class="bi bi-dot"></i>Coding Challenges</li>
-                                </ul>
-                            </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Student Information Form -->
-                        <div class="student-info mt-4">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="student-id" class="form-label">Student ID:</label>
-                                    <input type="text" id="student-id" class="form-control"
-                                           placeholder="Enter your student ID" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="student-name" class="form-label">Full Name (optional):</label>
-                                    <input type="text" id="student-name" class="form-control"
-                                           placeholder="Enter your full name">
-                                </div>
-                            </div>
+                <!-- Authentication Check -->
+                <div id="authCheck">
+                    <!-- Logged out view -->
+                    <div id="loggedOutView">
+                        <div class="alert alert-auth alert-warning mt-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            You must be logged in to take assessments.
                         </div>
-
-                        <div class="instructions mt-4">
-                            <h6><i class="bi bi-exclamation-triangle me-2"></i>Important Instructions:</h6>
-                            <ul class="mb-0">
-                                <li>Read each question carefully before answering</li>
-                                <li>For coding challenges, your code will be automatically tested</li>
-                                <li>You can navigate between questions using the Previous/Next buttons</li>
-                                <li>Your progress is automatically saved</li>
-                                <li>Make sure you have a stable internet connection</li>
-                            </ul>
+                        <div class="mt-3">
+                            <a href="../auth/login.html" class="btn btn-auth-required btn-lg me-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </a>
+                            <a href="../auth/register.html" class="btn btn-outline-warning btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>Register
+                            </a>
                         </div>
+                    </div>
 
-                        <button class="start-button" id="start-assessment">
+                    <!-- Logged in view -->
+                    <div id="loggedInView" style="display: none;">
+                        <button class="btn start-button" id="startAssessment">
                             <i class="bi bi-play-circle me-2"></i>
                             Start Assessment
                         </button>
@@ -225,357 +295,190 @@
                 </div>
             </div>
 
-            <!-- Assessment Content (will be populated by JavaScript) -->
-            <div id="assessment-content" style="display: none;">
-                <!-- Questions will be rendered here by the AssessmentEngine -->
-            </div>
+            <!-- Assessment Questions (will be populated by JS) -->
+            <div id="questionContainer" style="display: none;"></div>
         </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Configuration -->
-    <script src="../assets/js/config.js"></script>
+    <!-- Authentication Utils -->
+    <script src="../assets/js/auth-utils.js"></script>
 
     <!-- Assessment Engine -->
-    <script src="../assets/js/assessment-engine.js"></script>
+    <script src="../assets/js/assessment-engine-db.js"></script>
 
-    <!-- Judge0 Integration -->
-    <script src="../assets/js/judge0-integration-hybrid.js"></script>
+    <!-- Judge0 Integration (if needed for coding challenges) -->
+    <script src="../assets/js/judge0-integration.js"></script>
 
     <script>
-        // Global variables
-        let assessmentEngine = null;
-        let judge0 = null;
-        let timeRemaining = 30 * 60; // 30 minutes in seconds (default)
-        let timerInterval = null;
-        let assessmentStartTime = null;
+        let assessmentEngine;
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            initializeAssessment();
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePage();
         });
 
-        /**
-         * Setup event listeners
-         */
-        function setupEventListeners() {
-            document.getElementById('start-assessment').addEventListener('click', startAssessment);
+        async function initializePage() {
+            // Check authentication status
+            updateAuthDisplay();
 
-            // Handle page visibility changes to pause/resume timer
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    // Page is hidden, could pause timer or show warning
-                } else {
-                    // Page is visible again
-                }
-            });
-
-            // Prevent accidental page close during assessment
-            window.addEventListener('beforeunload', function(e) {
-                if (assessmentEngine && timeRemaining > 0) {
-                    e.preventDefault();
-                    e.returnValue = 'Your assessment progress will be lost. Are you sure you want to leave?';
-                    return e.returnValue;
-                }
-            });
-        }
-
-        /**
-         * Initialize assessment system
-         */
-        function initializeAssessment() {
-            // Initialize Judge0 integration
-            judge0 = new AssessmentJudge0();
-
-            // Check for existing progress
-            checkExistingProgress();
-        }
-
-        /**
-         * Check if student has existing progress
-         */
-        function checkExistingProgress() {
-            const savedProgress = localStorage.getItem(CONFIG.STORAGE_KEYS.CURRENT_ASSESSMENT);
-            if (savedProgress) {
-                try {
-                    const progress = JSON.parse(savedProgress);
-                    if (progress.questions && progress.questions[0] && progress.questions[0].id.startsWith('step1-')) {
-                        // Show option to resume
-                        showResumeOption(progress);
-                    }
-                } catch (error) {
-                    console.error('Error parsing saved progress:', error);
-                }
+            // Setup event listeners
+            const startBtn = document.getElementById('startAssessment');
+            if (startBtn) {
+                startBtn.addEventListener('click', startAssessment);
             }
+
+            // Listen for auth changes
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'auth_token' || e.key === 'user_data') {
+                    updateAuthDisplay();
+                }
+            });
         }
 
-        /**
-         * Show option to resume previous attempt
-         */
-        function showResumeOption(progress) {
-            const welcomeCard = document.querySelector('#welcome-screen .question-content');
-            const resumeAlert = `
-                <div class="alert alert-warning mt-3">
-                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Previous Attempt Found</h6>
-                    <p class="mb-2">You have an unfinished assessment. Would you like to resume where you left off?</p>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-warning btn-sm" onclick="resumeAssessment()">
-                            <i class="bi bi-play me-1"></i>Resume
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="clearProgress()">
-                            <i class="bi bi-trash me-1"></i>Start Fresh
-                        </button>
+        function updateAuthDisplay() {
+            const loggedOutView = document.getElementById('loggedOutView');
+            const loggedInView = document.getElementById('loggedInView');
+            const studentInfo = document.getElementById('studentInfo');
+            const studentDetails = document.getElementById('studentDetails');
+
+            if (authUtils.isAuthenticated()) {
+                const userData = authUtils.getUserData();
+
+                // Show logged in view
+                loggedOutView.style.display = 'none';
+                loggedInView.style.display = 'block';
+                studentInfo.style.display = 'block';
+
+                // Update student details
+                studentDetails.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-3">
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                ${userData.firstName[0]}${userData.lastName[0]}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">${userData.firstName} ${userData.lastName}</div>
+                            <div class="text-muted small">
+                                ${userData.email}
+                                ${userData.studentId ? `• ID: ${userData.studentId}` : ''}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            `;
-            welcomeCard.insertAdjacentHTML('beforeend', resumeAlert);
-        }
-
-        /**
-         * Resume previous assessment
-         */
-        function resumeAssessment() {
-            const studentId = document.getElementById('student-id').value || 'anonymous';
-            startAssessmentWithOptions({
-                studentId: studentId,
-                stepNumber: 1,
-                resumeProgress: true
-            });
-        }
-
-        /**
-         * Clear previous progress
-         */
-        function clearProgress() {
-            localStorage.removeItem(CONFIG.STORAGE_KEYS.CURRENT_ASSESSMENT);
-            // Clear timer data to ensure fresh start
-            clearTimerData();
-            document.querySelector('.alert-warning').remove();
-        }
-
-        /**
-         * Start the assessment
-         */
-        function startAssessment() {
-            const studentId = document.getElementById('student-id').value.trim();
-            if (!studentId) {
-                alert('Please enter your Student ID before starting the assessment.');
-                document.getElementById('student-id').focus();
-                return;
+                `;
+            } else {
+                // Show logged out view
+                loggedInView.style.display = 'none';
+                loggedOutView.style.display = 'block';
+                studentInfo.style.display = 'none';
             }
-
-            startAssessmentWithOptions({
-                studentId: studentId,
-                stepNumber: 1,
-                resumeProgress: false
-            });
         }
 
-        /**
-         * Start assessment with given options
-         */
-        function startAssessmentWithOptions(options) {
-            // Hide welcome screen
-            document.getElementById('welcome-screen').style.display = 'none';
-
-            // Show assessment interface
-            document.getElementById('assessment-content').style.display = 'block';
-            document.getElementById('progress-container').style.display = 'block';
-            document.getElementById('time-remaining').style.display = 'block';
-
-            // Initialize assessment engine
-            assessmentEngine = new AssessmentEngine('assessment-content', {
-                studentId: options.studentId,
-                stepNumber: options.stepNumber,
-                showProgress: true,
-                shuffleQuestions: false,
-                shuffleAnswers: true,
-                timeLimit: 30 * 60, // 30 minutes
-                autoSave: true
-            });
-
-            // Code execution is handled by AssessmentEngine
-
-            // Load questions
-            loadQuestionsAndStart();
-
-            // Start timer
-            startTimer();
-        }
-
-        // Code execution is now handled entirely by AssessmentEngine
-        // No need for duplicate HTML functions
-
-        /**
-         * Show execution result
-         */
-        function showExecutionResult(resultDiv, message, type) {
-            resultDiv.style.display = 'block';
-            resultDiv.className = `execution-result ${type}`;
-            resultDiv.textContent = message;
-        }
-
-        /**
-         * Load questions from JSON file
-         */
-        async function loadQuestionsAndStart() {
+        async function startAssessment() {
             try {
-                const response = await fetch('../../data/questions/step1-questions.json');
-                const questionsData = await response.json();
+                // Hide welcome screen
+                document.getElementById('welcomeScreen').style.display = 'none';
 
-                // Start assessment with loaded questions
-                await assessmentEngine.loadQuestions(questionsData);
+                // Show progress indicator
+                document.getElementById('progressIndicator').style.display = 'block';
+
+                // Show question container
+                document.getElementById('questionContainer').style.display = 'block';
+
+                // Initialize assessment engine
+                assessmentEngine = new DatabaseAssessmentEngine('questionContainer', {
+                    showProgress: true,
+                    allowSkip: true,
+                    autoSave: true,
+                    autoSaveInterval: 30000
+                });
+
+                // Start Step 1 assessment
+                await assessmentEngine.startAssessment(1);
+
+                // Show timer
+                document.getElementById('timerContainer').style.display = 'block';
 
             } catch (error) {
-                console.error('Error loading questions:', error);
-                assessmentEngine.showError('Failed to load assessment questions. Please refresh the page and try again.');
+                console.error('Failed to start assessment:', error);
+                showError('Failed to start assessment. Please try again.');
             }
         }
 
-        /**
-         * Start the assessment timer
-         */
-        function startTimer() {
-            // Check if we're resuming or starting fresh
-            const savedStartTime = localStorage.getItem('assessment_start_time');
-            const savedTimeLimit = localStorage.getItem('assessment_time_limit');
+        function showError(message) {
+            const questionContainer = document.getElementById('questionContainer');
+            questionContainer.innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    ${message}
+                </div>
+            `;
+        }
 
-            if (savedStartTime && savedTimeLimit) {
-                // Resume: calculate remaining time based on elapsed time
-                assessmentStartTime = parseInt(savedStartTime);
-                const totalTimeLimit = parseInt(savedTimeLimit);
-                const elapsedSeconds = Math.floor((Date.now() - assessmentStartTime) / 1000);
-                timeRemaining = Math.max(0, totalTimeLimit - elapsedSeconds);
+        // Update progress indicator
+        function updateProgress(currentQuestion, totalQuestions) {
+            const progressText = document.getElementById('progressText');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressFill = document.getElementById('progressFill');
 
-            } else {
-                // Starting fresh: save start time and time limit
-                assessmentStartTime = Date.now();
-                localStorage.setItem('assessment_start_time', assessmentStartTime.toString());
-                localStorage.setItem('assessment_time_limit', timeRemaining.toString());
+            if (progressText && progressPercent && progressFill) {
+                const percent = Math.round((currentQuestion / totalQuestions) * 100);
 
+                progressText.textContent = `Question ${currentQuestion} of ${totalQuestions}`;
+                progressPercent.textContent = `${percent}%`;
+                progressFill.style.width = `${percent}%`;
             }
+        }
 
-            // If time is already up, handle it
-            if (timeRemaining <= 0) {
-                handleTimeUp();
-                return;
-            }
+        // Timer functionality
+        let timerInterval;
 
-            updateTimerDisplay();
+        function startTimer(durationInSeconds) {
+            let remainingTime = durationInSeconds;
+            const timerDisplay = document.getElementById('timerDisplay');
 
             timerInterval = setInterval(() => {
-                timeRemaining--;
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
 
-                if (timeRemaining <= 0) {
-                    // Time's up!
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (remainingTime <= 0) {
                     clearInterval(timerInterval);
-                    handleTimeUp();
-                } else if (timeRemaining === 300) { // 5 minutes remaining
-                    showTimeWarning('5 minutes remaining!');
-                } else if (timeRemaining === 60) { // 1 minute remaining
-                    showTimeWarning('1 minute remaining!');
+                    // Auto-submit assessment
+                    if (assessmentEngine) {
+                        assessmentEngine.submitAssessment();
+                    }
+                } else if (remainingTime <= 300) { // Last 5 minutes
+                    document.getElementById('timerContainer').style.background = 'var(--danger-color)';
                 }
 
-                updateTimerDisplay();
-
-                // Save current remaining time every 10 seconds for more precise resume
-                if (timeRemaining % 10 === 0) {
-                    const elapsedSeconds = Math.floor((Date.now() - assessmentStartTime) / 1000);
-                    const totalTimeLimit = parseInt(localStorage.getItem('assessment_time_limit'));
-                    localStorage.setItem('assessment_time_remaining', (totalTimeLimit - elapsedSeconds).toString());
-                }
+                remainingTime--;
             }, 1000);
         }
 
-        /**
-         * Update timer display
-         */
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            const timeText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-            document.getElementById('time-text').textContent = timeText;
-
-            // Change color based on time remaining
-            const timeDiv = document.getElementById('time-remaining');
-            if (timeRemaining <= 60) {
-                timeDiv.style.backgroundColor = 'var(--danger-color)';
-            } else if (timeRemaining <= 300) {
-                timeDiv.style.backgroundColor = 'var(--warning-color)';
-            }
-        }
-
-        /**
-         * Handle when time runs out
-         */
-        function handleTimeUp() {
-            alert('Time is up! Your assessment will be submitted automatically.');
-
-            clearTimerData();
-
-            if (assessmentEngine) {
-                assessmentEngine.finishAssessment();
-            }
-        }
-
-        /**
-         * Clear timer data from localStorage
-         */
-        function clearTimerData() {
-            localStorage.removeItem('assessment_start_time');
-            localStorage.removeItem('assessment_time_limit');
-            localStorage.removeItem('assessment_time_remaining');
+        function stopTimer() {
             if (timerInterval) {
                 clearInterval(timerInterval);
-                timerInterval = null;
             }
         }
 
-        /**
-         * Show time warning
-         */
-        function showTimeWarning(message) {
-            // Could show toast notification or modal
-            const toast = document.createElement('div');
-            toast.className = 'alert alert-warning position-fixed';
-            toast.style.top = '80px';
-            toast.style.right = '20px';
-            toast.style.zIndex = '1001';
-            toast.innerHTML = `<i class="bi bi-clock me-2"></i>${message}`;
-
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 3000);
-        }
-
-        // Highlight code blocks when they're added to the page
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === 1) { // Element node
-                            const codeBlocks = node.querySelectorAll ? node.querySelectorAll('pre code') : [];
-                            codeBlocks.forEach(function(block) {
-                                hljs.highlightElement(block);
-                            });
-                        }
-                    });
-                }
-            });
+        // Handle page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (assessmentEngine && assessmentEngine.attemptData && assessmentEngine.attemptData.status === 'in_progress') {
+                e.preventDefault();
+                e.returnValue = '';
+                return 'Your assessment progress will be saved, but you may lose your current work.';
+            }
         });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        // Global functions for assessment engine callbacks
+        window.updateProgress = updateProgress;
+        window.startTimer = startTimer;
+        window.stopTimer = stopTimer;
     </script>
 </body>
 </html>
