@@ -29,3 +29,20 @@ data/submissions/*.json
 # Build artifacts
 dist/
 build/
+
+# Claude Code related files
+.claude/
+.claude_code/
+.claude-code/
+claude_code_session/
+*claude_session*
+*claude_code*
+.claude_session
+.claudecode
+claude-code.log
+claude-session.log
+
+# Environment variables (Vercel specific)
+.env.local
+.env.production
+.vercel
