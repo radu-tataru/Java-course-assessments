@@ -26,14 +26,50 @@ function verifyToken(req) {
 }
 
 // Database functions
-async function getAllUsers() {
+async function getAllUsers(roleFilter = null) {
     try {
-        const result = await sql`
-            SELECT
-                id, email, first_name, last_name, role, student_id, created_at
-            FROM users
-            ORDER BY created_at DESC
-        `;
+        // First, try to add missing columns if they don't exist (safe operation)
+        try {
+            await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`;
+            await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true`;
+        } catch (altError) {
+            // Ignore errors - columns might already exist
+            console.log('Column addition info:', altError.message);
+        }
+
+        let query;
+        if (roleFilter) {
+            query = sql`
+                SELECT
+                    u.id, u.email, u.first_name, u.last_name, u.role, u.student_id, u.created_at,
+                    COALESCE(u.last_login, u.created_at) as last_login,
+                    COALESCE(u.is_active, true) as is_active,
+                    COUNT(CASE WHEN aa.status = 'completed' THEN 1 END) as completed_assessments,
+                    COUNT(CASE WHEN aa.status = 'in_progress' THEN 1 END) as in_progress_assessments,
+                    ROUND(AVG(CASE WHEN aa.status = 'completed' THEN aa.score END), 2) as average_score
+                FROM users u
+                LEFT JOIN assessment_attempts aa ON u.id = aa.user_id
+                WHERE u.role = ${roleFilter}
+                GROUP BY u.id, u.email, u.first_name, u.last_name, u.role, u.student_id, u.created_at, u.last_login, u.is_active
+                ORDER BY u.created_at DESC
+            `;
+        } else {
+            query = sql`
+                SELECT
+                    u.id, u.email, u.first_name, u.last_name, u.role, u.student_id, u.created_at,
+                    COALESCE(u.last_login, u.created_at) as last_login,
+                    COALESCE(u.is_active, true) as is_active,
+                    COUNT(CASE WHEN aa.status = 'completed' THEN 1 END) as completed_assessments,
+                    COUNT(CASE WHEN aa.status = 'in_progress' THEN 1 END) as in_progress_assessments,
+                    ROUND(AVG(CASE WHEN aa.status = 'completed' THEN aa.score END), 2) as average_score
+                FROM users u
+                LEFT JOIN assessment_attempts aa ON u.id = aa.user_id
+                GROUP BY u.id, u.email, u.first_name, u.last_name, u.role, u.student_id, u.created_at, u.last_login, u.is_active
+                ORDER BY u.created_at DESC
+            `;
+        }
+
+        const result = await query;
         return result.rows;
     } catch (error) {
         console.error('Database error in getAllUsers:', error);
@@ -132,11 +168,21 @@ module.exports = async function handler(req, res) {
     try {
         const user = verifyToken(req);
 
-        // Only admins can manage users
-        if (user.role !== 'admin') {
-            return res.status(403).json({
-                error: 'Access denied. Admin privileges required.'
-            });
+        // Check permissions based on endpoint and method
+        if (req.method === 'GET') {
+            // Teachers and admins can view users
+            if (user.role !== 'admin' && user.role !== 'teacher') {
+                return res.status(403).json({
+                    error: 'Access denied. Teacher or admin privileges required.'
+                });
+            }
+        } else {
+            // Only admins can create/delete users
+            if (user.role !== 'admin') {
+                return res.status(403).json({
+                    error: 'Access denied. Admin privileges required.'
+                });
+            }
         }
 
         const url = new URL(req.url, `http://${req.headers.host}`);
@@ -181,8 +227,20 @@ module.exports = async function handler(req, res) {
 
         // Base /api/users endpoint
         if (req.method === 'GET') {
-            // GET /api/users - get all users
-            const users = await getAllUsers();
+            // GET /api/users - get all users, optionally filtered by role
+            const roleFilter = url.searchParams.get('role');
+
+            // Teachers can only view students
+            if (user.role === 'teacher' && roleFilter && roleFilter !== 'student') {
+                return res.status(403).json({
+                    error: 'Teachers can only view student users'
+                });
+            }
+
+            // If teacher doesn't specify role, default to students
+            const actualRoleFilter = user.role === 'teacher' ? 'student' : roleFilter;
+
+            const users = await getAllUsers(actualRoleFilter);
             return res.status(200).json({
                 success: true,
                 users
