@@ -327,8 +327,8 @@
                             <strong>${assessment.title}</strong>
                             <br><small class="text-muted">${assessment.description || ''}</small>
                         </td>
-                        <td>${assessment.question_count || 0} questions</td>
-                        <td>${assessment.time_limit || 0} min</td>
+                        <td>${assessment.total_questions || 0} questions</td>
+                        <td>${assessment.duration_minutes || 0} min</td>
                         <td>${attempts.length} attempts</td>
                         <td>${avgScore}%</td>
                         <td>${statusBadge}</td>
@@ -420,8 +420,9 @@
                 <h6 class="mt-4">Assessment Details</h6>
                 <ul>
                     <li><strong>Step:</strong> ${assessment.step_number || assessment.id}</li>
-                    <li><strong>Questions:</strong> ${assessment.question_count || 0}</li>
-                    <li><strong>Time Limit:</strong> ${assessment.time_limit || 0} minutes</li>
+                    <li><strong>Questions:</strong> ${assessment.total_questions || 0}</li>
+                    <li><strong>Time Limit:</strong> ${assessment.duration_minutes || 0} minutes</li>
+                    <li><strong>Passing Score:</strong> ${assessment.passing_score || 70}%</li>
                     <li><strong>Status:</strong> ${assessment.is_active !== false ? 'Active' : 'Inactive'}</li>
                 </ul>
 

@@ -33,8 +33,9 @@ async function getAllAssessments() {
                 step_number,
                 title,
                 description,
-                time_limit as duration_minutes,
-                question_count as total_questions,
+                duration_minutes,
+                total_questions,
+                passing_score,
                 is_active,
                 created_at
             FROM assessments
