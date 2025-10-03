@@ -104,9 +104,12 @@ async function updateAssessmentAttempt(attemptId, updateData) {
             UPDATE assessment_attempts
             SET
                 status = ${updateData.status || 'in_progress'},
-                completed_at = ${updateData.submitted_at || null},
+                submitted_at = ${updateData.submitted_at || null},
                 time_spent_seconds = ${updateData.time_spent_seconds || 0},
-                score = ${updateData.score || 0}
+                score = ${updateData.score !== undefined ? updateData.score : null},
+                total_points = ${updateData.total_points !== undefined ? updateData.total_points : null},
+                percentage = ${updateData.percentage !== undefined ? updateData.percentage : null},
+                is_passed = ${updateData.is_passed !== undefined ? updateData.is_passed : null}
             WHERE id = ${attemptId}
             RETURNING *
         `;
