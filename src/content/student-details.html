@@ -192,7 +192,7 @@
                 studentData = studentResult.user || studentResult;
 
                 // Load student attempts
-                const attemptsResponse = await fetch(`/api/user-attempts?userId=${studentId}`, {
+                const attemptsResponse = await fetch(`/api/student-data?type=attempts&userId=${studentId}`, {
                     headers: {
                         'Authorization': `Bearer ${authUtils.getToken()}`
                     }

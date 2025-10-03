@@ -1,6 +1,9 @@
 /**
- * Student progress API endpoint
- * GET /api/progress
+ * Student data API endpoint - consolidated
+ * Handles user attempts and progress data
+ *
+ * GET /api/student-data?type=attempts&userId=123
+ * GET /api/student-data?type=progress&userId=123
  */
 
 const jwt = require('jsonwebtoken');
@@ -24,7 +27,33 @@ function verifyToken(req) {
     }
 }
 
-// Database function to get student progress
+// Get user attempts
+async function getUserAttempts(userId) {
+    try {
+        const result = await sql`
+            SELECT
+                aa.id,
+                aa.assessment_id,
+                aa.started_at,
+                aa.submitted_at,
+                aa.time_spent_seconds as duration,
+                aa.score,
+                aa.status,
+                a.step_number as assessment_step,
+                a.title as assessment_title
+            FROM assessment_attempts aa
+            JOIN assessments a ON aa.assessment_id = a.id
+            WHERE aa.user_id = ${userId}
+            ORDER BY aa.started_at DESC
+        `;
+        return result.rows;
+    } catch (error) {
+        console.error('Database error in getUserAttempts:', error);
+        throw error;
+    }
+}
+
+// Get student progress
 async function getStudentProgress(userId = null) {
     try {
         if (userId) {
@@ -60,7 +89,7 @@ async function getStudentProgress(userId = null) {
                 last_submission: row.last_activity
             }));
         } else {
-            // Get progress for all students - first get basic user data
+            // Get progress for all students
             const result = await sql`
                 SELECT
                     u.id,
@@ -74,8 +103,6 @@ async function getStudentProgress(userId = null) {
                 ORDER BY u.last_name, u.first_name
             `;
 
-            // For now, return basic student data with zero attempts
-            // TODO: Implement assessment_attempts table join when it has data
             return result.rows.map(row => ({
                 id: row.id,
                 first_name: row.first_name,
@@ -114,16 +141,40 @@ module.exports = async function handler(req, res) {
         const user = verifyToken(req);
 
         const url = new URL(req.url, `http://${req.headers.host}`);
-        const userId = url.searchParams.get('userId');
+        const type = url.searchParams.get('type') || 'attempts';
+        const requestedUserId = url.searchParams.get('userId');
 
-        // Students can only view their own progress
-        const targetUserId = (user.role === 'student') ? user.id : (userId ? parseInt(userId) : null);
+        let targetUserId = user.id; // Default to logged-in user
 
-        const progress = await getStudentProgress(targetUserId);
+        // Teachers and admins can view other users' data
+        if (requestedUserId && (user.role === 'teacher' || user.role === 'admin')) {
+            targetUserId = parseInt(requestedUserId);
+        } else if (requestedUserId && user.role === 'student') {
+            // Students can only view their own data
+            return res.status(403).json({
+                error: 'Access denied. You can only view your own data.'
+            });
+        }
+
+        let result;
+        switch (type) {
+            case 'attempts':
+                const attempts = await getUserAttempts(targetUserId);
+                result = { attempts };
+                break;
+
+            case 'progress':
+                const progress = await getStudentProgress(targetUserId);
+                result = { progress };
+                break;
+
+            default:
+                return res.status(400).json({ error: 'Invalid type parameter. Use: attempts or progress' });
+        }
 
         return res.status(200).json({
             success: true,
-            progress
+            ...result
         });
 
     } catch (error) {
@@ -131,9 +182,9 @@ module.exports = async function handler(req, res) {
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        console.error('Get progress error:', error);
+        console.error('Student data API error:', error);
         return res.status(500).json({
-            error: 'Failed to fetch progress',
+            error: 'Failed to fetch student data',
             details: error.message
         });
     }

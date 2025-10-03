@@ -211,12 +211,12 @@
 
                 // Load user progress data
                 const [progressResponse, attemptsResponse] = await Promise.all([
-                    fetch('/api/progress', {
+                    fetch('/api/student-data?type=progress', {
                         headers: {
                             'Authorization': `Bearer ${authUtils.getToken()}`
                         }
                     }),
-                    fetch('/api/user-attempts', {
+                    fetch('/api/student-data?type=attempts', {
                         headers: {
                             'Authorization': `Bearer ${authUtils.getToken()}`
                         }

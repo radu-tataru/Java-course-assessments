@@ -895,7 +895,7 @@
 
         async function loadStudentData() {
             try {
-                const response = await authUtils.apiRequest('/api/progress');
+                const response = await authUtils.apiRequest('/api/student-data?type=progress');
                 const data = await response.json();
 
                 if (data.success) {
