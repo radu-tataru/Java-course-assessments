@@ -34,21 +34,61 @@ async function getAssessmentStats() {
             WHERE role = 'student'
         `;
 
-        // Get total assessments - simplified for now since we know there's at least one
-        const assessmentsResult = await sql`
-            SELECT COUNT(*) as total_assessments
-            FROM assessments
+        // Get completed assessments count
+        const completedResult = await sql`
+            SELECT COUNT(*) as completed
+            FROM assessment_attempts
+            WHERE status IN ('completed', 'submitted')
         `;
 
-        // For now, return basic stats with attempts as 0 until assessment_attempts table has data
+        // Get pending reviews count (completed but not yet reviewed)
+        const pendingResult = await sql`
+            SELECT COUNT(*) as pending
+            FROM assessment_attempts
+            WHERE status = 'submitted'
+        `;
+
+        // Get average score
+        const avgScoreResult = await sql`
+            SELECT ROUND(AVG(score), 2) as avg_score
+            FROM assessment_attempts
+            WHERE status IN ('completed', 'submitted') AND score IS NOT NULL
+        `;
+
+        // Get score distribution
+        const distributionResult = await sql`
+            SELECT
+                COUNT(CASE WHEN score >= 90 THEN 1 END) as excellent,
+                COUNT(CASE WHEN score >= 80 AND score < 90 THEN 1 END) as good,
+                COUNT(CASE WHEN score >= 70 AND score < 80 THEN 1 END) as satisfactory,
+                COUNT(CASE WHEN score < 70 THEN 1 END) as needs_improvement
+            FROM assessment_attempts
+            WHERE status IN ('completed', 'submitted') AND score IS NOT NULL
+        `;
+
         const totalStudents = parseInt(studentsResult.rows[0].total_students) || 0;
-        const totalAssessments = parseInt(assessmentsResult.rows[0].total_assessments) || 1;
+        const completedAssessments = parseInt(completedResult.rows[0].completed) || 0;
+        const pendingReviews = parseInt(pendingResult.rows[0].pending) || 0;
+        const averageScore = parseFloat(avgScoreResult.rows[0].avg_score) || 0;
+
+        const distribution = distributionResult.rows[0] || {
+            excellent: 0,
+            good: 0,
+            satisfactory: 0,
+            needs_improvement: 0
+        };
 
         return {
             totalStudents,
-            totalAssessments,
-            totalAttempts: 0,
-            completedAttempts: 0
+            completedAssessments,
+            pendingReviews,
+            averageScore,
+            scoreDistribution: {
+                excellent: parseInt(distribution.excellent),
+                good: parseInt(distribution.good),
+                satisfactory: parseInt(distribution.satisfactory),
+                needsImprovement: parseInt(distribution.needs_improvement)
+            }
         };
     } catch (error) {
         console.error('Database error in getAssessmentStats:', error);
