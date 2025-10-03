@@ -161,7 +161,7 @@
                     return;
                 }
 
-                const response = await fetch('/api/user-attempts', {
+                const response = await fetch('/api/student-data?type=attempts', {
                     headers: {
                         'Authorization': `Bearer ${authUtils.getToken()}`
                     }
