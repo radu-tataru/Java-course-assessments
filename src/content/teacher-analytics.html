@@ -245,12 +245,12 @@
 
                 // Load analytics data
                 const [statsResponse, activityResponse] = await Promise.all([
-                    fetch('/api/stats', {
+                    fetch('/api/analytics?type=stats', {
                         headers: {
                             'Authorization': `Bearer ${authUtils.getToken()}`
                         }
                     }),
-                    fetch('/api/recent-activity', {
+                    fetch('/api/analytics?type=activity', {
                         headers: {
                             'Authorization': `Bearer ${authUtils.getToken()}`
                         }
@@ -380,7 +380,7 @@
 
         async function loadAssessmentProgress() {
             try {
-                const response = await fetch('/api/assessment-overview', {
+                const response = await fetch('/api/analytics?type=overview', {
                     headers: {
                         'Authorization': `Bearer ${authUtils.getToken()}`
                     }
