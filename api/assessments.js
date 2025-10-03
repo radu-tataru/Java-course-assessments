@@ -24,6 +24,112 @@ function verifyToken(req) {
     }
 }
 
+// Database helper functions
+async function getAllAssessments() {
+    try {
+        const result = await sql`
+            SELECT
+                id,
+                step_number,
+                title,
+                description,
+                time_limit as duration_minutes,
+                question_count as total_questions,
+                is_active,
+                created_at
+            FROM assessments
+            ORDER BY step_number ASC
+        `;
+        return result.rows;
+    } catch (error) {
+        console.error('Database error in getAllAssessments:', error);
+        throw error;
+    }
+}
+
+async function getAssessmentById(assessmentId) {
+    try {
+        const result = await sql`
+            SELECT * FROM assessments WHERE id = ${assessmentId}
+        `;
+        return result.rows[0] || null;
+    } catch (error) {
+        console.error('Database error in getAssessmentById:', error);
+        throw error;
+    }
+}
+
+async function getAssessmentByStep(stepNumber) {
+    try {
+        const result = await sql`
+            SELECT * FROM assessments WHERE step_number = ${stepNumber}
+        `;
+        return result.rows[0] || null;
+    } catch (error) {
+        console.error('Database error in getAssessmentByStep:', error);
+        throw error;
+    }
+}
+
+async function createAssessmentAttempt(userId, assessmentId) {
+    try {
+        const result = await sql`
+            INSERT INTO assessment_attempts (user_id, assessment_id, status, started_at)
+            VALUES (${userId}, ${assessmentId}, 'in_progress', NOW())
+            RETURNING *
+        `;
+        return result.rows[0];
+    } catch (error) {
+        console.error('Database error in createAssessmentAttempt:', error);
+        throw error;
+    }
+}
+
+async function getAssessmentAttempt(attemptId) {
+    try {
+        const result = await sql`
+            SELECT * FROM assessment_attempts WHERE id = ${attemptId}
+        `;
+        return result.rows[0] || null;
+    } catch (error) {
+        console.error('Database error in getAssessmentAttempt:', error);
+        throw error;
+    }
+}
+
+async function updateAssessmentAttempt(attemptId, updateData) {
+    try {
+        const result = await sql`
+            UPDATE assessment_attempts
+            SET
+                status = ${updateData.status || 'in_progress'},
+                completed_at = ${updateData.submitted_at || null},
+                time_spent_seconds = ${updateData.time_spent_seconds || 0},
+                score = ${updateData.score || 0}
+            WHERE id = ${attemptId}
+            RETURNING *
+        `;
+        return result.rows[0];
+    } catch (error) {
+        console.error('Database error in updateAssessmentAttempt:', error);
+        throw error;
+    }
+}
+
+async function getQuestionsByAssessment(assessmentId) {
+    try {
+        const result = await sql`
+            SELECT * FROM questions
+            WHERE assessment_id = ${assessmentId}
+            ORDER BY id ASC
+        `;
+        return result.rows;
+    } catch (error) {
+        console.error('Database error in getQuestionsByAssessment:', error);
+        throw error;
+    }
+}
+
 module.exports = async function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
