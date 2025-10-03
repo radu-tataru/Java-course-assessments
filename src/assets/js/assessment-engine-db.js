@@ -228,15 +228,10 @@ class DatabaseAssessmentEngine {
                         `;
                     }).join('')}
                 </div>
-
-                <div class="question-actions mt-4">
-                    ${this.renderNavigationButtons()}
-                </div>
             </div>
         `;
 
         this.container.innerHTML = html;
-        this.setupQuestionEventListeners(question);
     }
 
     /**
@@ -282,15 +277,10 @@ class DatabaseAssessmentEngine {
                         `;
                     }).join('')}
                 </div>
-
-                <div class="question-actions mt-4">
-                    ${this.renderNavigationButtons()}
-                </div>
             </div>
         `;
 
         this.container.innerHTML = html;
-        this.setupQuestionEventListeners(question);
     }
 
     /**
@@ -335,9 +325,6 @@ class DatabaseAssessmentEngine {
                     </div>
                 </div>
 
-                <div class="question-actions mt-4">
-                    ${this.renderNavigationButtons()}
-                </div>
             </div>
         `;
 
@@ -383,9 +370,6 @@ class DatabaseAssessmentEngine {
                               name="question_${question.id}">${completeTemplate}</textarea>
                 </div>
 
-                <div class="question-actions mt-4">
-                    ${this.renderNavigationButtons()}
-                </div>
             </div>
         `;
 
@@ -453,9 +437,6 @@ class DatabaseAssessmentEngine {
 
                 <div class="execution-result mb-4" data-execution-result style="display: none;"></div>
 
-                <div class="question-actions mt-4">
-                    ${this.renderNavigationButtons()}
-                </div>
             </div>
         `;
 
@@ -561,59 +542,9 @@ class DatabaseAssessmentEngine {
         // Using CodeMirror or similar syntax highlighter
     }
 
-    renderNavigationButtons() {
-        const isFirst = this.currentQuestionIndex === 0;
-        const isLast = this.currentQuestionIndex === this.questions.length - 1;
-
-        return `
-            <div class="d-flex justify-content-between">
-                <button class="btn btn-outline-secondary"
-                        ${isFirst ? 'disabled' : ''}
-                        data-prev-question>
-                    <i class="bi bi-arrow-left"></i> Previous
-                </button>
-
-                <div class="text-center">
-                    <button class="btn btn-success" data-save-answer>
-                        <i class="bi bi-check-circle"></i> Save Answer
-                    </button>
-                </div>
-
-                ${isLast ? `
-                    <button class="btn btn-primary" data-submit-assessment>
-                        <i class="bi bi-check-square"></i> Submit Assessment
-                    </button>
-                ` : `
-                    <button class="btn btn-primary" data-next-question>
-                        Next <i class="bi bi-arrow-right"></i>
-                    </button>
-                `}
-            </div>
-        `;
-    }
-
     setupQuestionEventListeners(question) {
-        // Previous/Next navigation
-        const prevBtn = this.container.querySelector('[data-prev-question]');
-        const nextBtn = this.container.querySelector('[data-next-question]');
-        const saveBtn = this.container.querySelector('[data-save-answer]');
-        const submitBtn = this.container.querySelector('[data-submit-assessment]');
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.goToPreviousQuestion());
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.goToNextQuestion());
-        }
-
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.saveCurrentAnswer(question));
-        }
-
-        if (submitBtn) {
-            submitBtn.addEventListener('click', () => this.confirmSubmission());
-        }
+        // Event listeners for question-specific elements (like radio buttons, code editors)
+        // Navigation button listeners are now in setupBottomNavListeners
 
         // Answer change listeners
         const radioInputs = this.container.querySelectorAll('input[type="radio"]');
@@ -841,23 +772,23 @@ class DatabaseAssessmentEngine {
 
         navContainer.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-outline-secondary btn-lg ${isFirst ? 'invisible' : ''}"
+                <button class="btn btn-outline-secondary ${isFirst ? 'invisible' : ''}"
                         ${isFirst ? 'disabled' : ''}
                         data-prev-question
-                        style="min-width: 140px;">
+                        style="min-width: 120px;">
                     <i class="bi bi-arrow-left"></i> Previous
                 </button>
 
-                <button class="btn btn-success btn-lg" data-save-answer style="min-width: 160px;">
+                <button class="btn btn-success" data-save-answer style="min-width: 140px;">
                     <i class="bi bi-check-circle"></i> Save Answer
                 </button>
 
                 ${isLast ? `
-                    <button class="btn btn-primary btn-lg" data-submit-assessment style="min-width: 140px;">
+                    <button class="btn btn-primary" data-submit-assessment style="min-width: 120px;">
                         <i class="bi bi-check-square"></i> Submit
                     </button>
                 ` : `
-                    <button class="btn btn-primary btn-lg" data-next-question style="min-width: 140px;">
+                    <button class="btn btn-primary" data-next-question style="min-width: 120px;">
                         Next <i class="bi bi-arrow-right"></i>
                     </button>
                 `}
