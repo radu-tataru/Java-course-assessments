@@ -792,17 +792,22 @@ class DatabaseAssessmentEngine {
 
     updateProgressIndicator() {
         // Update progress bar if exists
-        const progressBar = document.querySelector('.progress-bar');
+        const progressFill = document.getElementById('progressFill');
         const progressText = document.getElementById('progressText');
+        const progressPercent = document.getElementById('progressPercent');
 
-        if (progressBar) {
-            const progressPercentage = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
-            progressBar.style.width = progressPercentage + '%';
-            progressBar.setAttribute('aria-valuenow', progressPercentage);
+        const progressPercentage = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+
+        if (progressFill) {
+            progressFill.style.width = progressPercentage + '%';
         }
 
         if (progressText) {
             progressText.textContent = `Question ${this.currentQuestionIndex + 1} of ${this.questions.length}`;
+        }
+
+        if (progressPercent) {
+            progressPercent.textContent = Math.round(progressPercentage) + '%';
         }
     }
 
