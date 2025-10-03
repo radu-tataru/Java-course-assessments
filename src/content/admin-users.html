@@ -302,17 +302,26 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to load users');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to load users');
                 }
 
-                allUsers = await response.json();
+                const data = await response.json();
+                // API returns { success: true, users: [...] }
+                allUsers = data.users || data;
                 filteredUsers = [...allUsers];
                 displayUsers();
                 updateStatistics();
 
             } catch (error) {
                 console.error('Load users error:', error);
-                showError('Failed to load users');
+                showError('Failed to load users: ' + error.message);
+                document.getElementById('usersLoading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${error.message}
+                    </div>
+                `;
             }
         }
 
@@ -442,7 +451,7 @@
             }
 
             try {
-                const response = await fetch('/api/auth/register', {
+                const response = await fetch('/api/users', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

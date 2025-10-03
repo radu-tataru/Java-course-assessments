@@ -157,7 +157,7 @@ async function deleteUser(userId) {
 module.exports = async function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     if (req.method === 'OPTIONS') {
@@ -203,26 +203,76 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // Check if it's a user ID (for DELETE operations)
+        // Check if it's a user ID (for DELETE/PUT operations)
         const userId = parseInt(lastPart);
         if (!isNaN(userId)) {
-            // DELETE /api/users/:id
-            if (req.method !== 'DELETE') {
+            if (req.method === 'DELETE') {
+                // DELETE /api/users/:id
+                // Prevent admin from deleting themselves
+                if (userId === user.id) {
+                    return res.status(400).json({
+                        error: 'Cannot delete your own account'
+                    });
+                }
+
+                const deletedUser = await deleteUser(userId);
+                return res.status(200).json({
+                    success: true,
+                    message: `User ${deletedUser.first_name} ${deletedUser.last_name} deleted successfully`
+                });
+            } else if (req.method === 'PUT') {
+                // PUT /api/users/:id - update user
+                const { firstName, lastName, email, role, password } = req.body;
+
+                // Validation
+                if (!firstName || !lastName || !email || !role) {
+                    return res.status(400).json({
+                        error: 'First name, last name, email, and role are required'
+                    });
+                }
+
+                // Build update query
+                let updateFields = `
+                    first_name = ${firstName},
+                    last_name = ${lastName},
+                    email = ${email.toLowerCase()},
+                    role = ${role}
+                `;
+
+                // If password is provided, hash and update it
+                if (password && password.length >= 6) {
+                    const saltRounds = 12;
+                    const passwordHash = await bcrypt.hash(password, saltRounds);
+                    updateFields += `, password_hash = ${passwordHash}`;
+                } else if (password && password.length < 6) {
+                    return res.status(400).json({
+                        error: 'Password must be at least 6 characters long'
+                    });
+                }
+
+                const result = await sql`
+                    UPDATE users
+                    SET first_name = ${firstName},
+                        last_name = ${lastName},
+                        email = ${email.toLowerCase()},
+                        role = ${role}
+                        ${password ? sql`, password_hash = ${await bcrypt.hash(password, 12)}` : sql``}
+                    WHERE id = ${userId}
+                    RETURNING id, email, first_name, last_name, role
+                `;
+
+                if (result.rows.length === 0) {
+                    return res.status(404).json({ error: 'User not found' });
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'User updated successfully',
+                    user: result.rows[0]
+                });
+            } else {
                 return res.status(405).json({ error: 'Method not allowed' });
             }
-
-            // Prevent admin from deleting themselves
-            if (userId === user.id) {
-                return res.status(400).json({
-                    error: 'Cannot delete your own account'
-                });
-            }
-
-            const deletedUser = await deleteUser(userId);
-            return res.status(200).json({
-                success: true,
-                message: `User ${deletedUser.first_name} ${deletedUser.last_name} deleted successfully`
-            });
         }
 
         // Base /api/users endpoint
