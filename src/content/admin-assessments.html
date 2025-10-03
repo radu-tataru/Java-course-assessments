@@ -232,14 +232,15 @@
 
         async function loadAssessments() {
             try {
-                const response = await fetch('/api/assessments', {
+                const response = await fetch('/api/assessments?endpoint=list', {
                     headers: {
                         'Authorization': `Bearer ${authUtils.getToken()}`
                     }
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to load assessments');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to load assessments');
                 }
 
                 const data = await response.json();
@@ -249,7 +250,13 @@
 
             } catch (error) {
                 console.error('Load assessments error:', error);
-                showError('Failed to load assessments');
+                showError('Failed to load assessments: ' + error.message);
+                document.getElementById('assessmentsLoading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${error.message}
+                    </div>
+                `;
             }
         }
 
