@@ -688,6 +688,12 @@ class DatabaseAssessmentEngine {
     }
 
     showResults(results) {
+        // Ensure results object has all required properties
+        const score = results?.score ?? 0;
+        const totalPoints = results?.totalPoints ?? 100;
+        const percentage = results?.percentage ?? 0;
+        const isPassed = results?.isPassed ?? false;
+
         this.container.innerHTML = `
             <div class="assessment-results text-center py-5">
                 <h2>Assessment Complete!</h2>
@@ -699,20 +705,20 @@ class DatabaseAssessmentEngine {
                                     <h3 class="mb-4">Your Results</h3>
                                     <div class="row text-center">
                                         <div class="col-md-3">
-                                            <div class="h4">${results.score}</div>
+                                            <div class="h4">${score}</div>
                                             <div class="text-muted">Points Earned</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="h4">${results.totalPoints}</div>
+                                            <div class="h4">${totalPoints}</div>
                                             <div class="text-muted">Total Points</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="h4">${results.percentage.toFixed(1)}%</div>
+                                            <div class="h4">${percentage.toFixed(1)}%</div>
                                             <div class="text-muted">Score</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="h4 ${results.isPassed ? 'text-success' : 'text-danger'}">
-                                                ${results.isPassed ? 'PASSED' : 'NOT PASSED'}
+                                            <div class="h4 ${isPassed ? 'text-success' : 'text-danger'}">
+                                                ${isPassed ? 'PASSED' : 'NOT PASSED'}
                                             </div>
                                             <div class="text-muted">Status</div>
                                         </div>
