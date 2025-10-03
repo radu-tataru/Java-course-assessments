@@ -841,31 +841,54 @@ class DatabaseAssessmentEngine {
 
         navContainer.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-outline-secondary ${isFirst ? 'invisible' : ''}"
+                <button class="btn btn-outline-secondary btn-lg ${isFirst ? 'invisible' : ''}"
                         ${isFirst ? 'disabled' : ''}
-                        data-prev-question>
+                        data-prev-question
+                        style="min-width: 140px;">
                     <i class="bi bi-arrow-left"></i> Previous
                 </button>
 
-                <div class="text-center">
-                    <button class="btn btn-success" data-save-answer>
-                        <i class="bi bi-check-circle"></i> Save Answer
-                    </button>
-                </div>
+                <button class="btn btn-success btn-lg" data-save-answer style="min-width: 160px;">
+                    <i class="bi bi-check-circle"></i> Save Answer
+                </button>
 
                 ${isLast ? `
-                    <button class="btn btn-primary" data-submit-assessment>
-                        <i class="bi bi-check-square"></i> Submit Assessment
+                    <button class="btn btn-primary btn-lg" data-submit-assessment style="min-width: 140px;">
+                        <i class="bi bi-check-square"></i> Submit
                     </button>
                 ` : `
-                    <button class="btn btn-primary" data-next-question>
+                    <button class="btn btn-primary btn-lg" data-next-question style="min-width: 140px;">
                         Next <i class="bi bi-arrow-right"></i>
                     </button>
                 `}
             </div>
         `;
 
-        this.setupQuestionEventListeners(question);
+        // Setup event listeners for bottom nav buttons
+        this.setupBottomNavListeners(question);
+    }
+
+    setupBottomNavListeners(question) {
+        const prevBtn = document.querySelector('#navigationButtons [data-prev-question]');
+        const nextBtn = document.querySelector('#navigationButtons [data-next-question]');
+        const saveBtn = document.querySelector('#navigationButtons [data-save-answer]');
+        const submitBtn = document.querySelector('#navigationButtons [data-submit-assessment]');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => this.goToPreviousQuestion());
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => this.goToNextQuestion());
+        }
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveCurrentAnswer(question));
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', () => this.confirmSubmission());
+        }
     }
 
     // Utility methods
