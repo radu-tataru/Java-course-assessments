@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+</head>
+<body style="background: white; padding: 0; margin: 0;">
+    <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card text-white" style="background: linear-gradient(135deg, #dc3545, #6c757d);">
+                    <div class="card-body py-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="mb-2">
+                                    <i class="bi bi-people me-2"></i>
+                                    User Management
+                                </h2>
+                                <p class="lead mb-0">Manage all users in the system</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                    <i class="bi bi-person-plus me-1"></i>Add User
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-primary mb-2">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="totalUsers">0</h5>
+                        <small class="text-muted">Total Users</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-success mb-2">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="totalStudents">0</h5>
+                        <small class="text-muted">Students</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-info mb-2">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="totalTeachers">0</h5>
+                        <small class="text-muted">Teachers</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-danger mb-2">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="totalAdmins">0</h5>
+                        <small class="text-muted">Admins</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <label for="searchUsers" class="form-label">Search Users</label>
+                                <input type="text" class="form-control" id="searchUsers" placeholder="Search by name or email...">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filterRole" class="form-label">Filter by Role</label>
+                                <select class="form-select" id="filterRole">
+                                    <option value="">All Roles</option>
+                                    <option value="student">Students</option>
+                                    <option value="teacher">Teachers</option>
+                                    <option value="admin">Admins</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="sortBy" class="form-label">Sort by</label>
+                                <select class="form-select" id="sortBy">
+                                    <option value="name">Name</option>
+                                    <option value="email">Email</option>
+                                    <option value="role">Role</option>
+                                    <option value="created">Created Date</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-table me-2"></i>Users List
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Loading state -->
+                        <div id="usersLoading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="mt-2">Loading users...</div>
+                        </div>
+
+                        <!-- Users table -->
+                        <div id="usersTable" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Created</th>
+                                            <th>Last Active</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Empty state -->
+                        <div id="usersEmpty" style="display: none;" class="text-center py-5">
+                            <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+                            <p class="text-muted mt-3">No users found</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-plus me-2"></i>Add New User
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                            <small class="text-muted">Minimum 6 characters</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" required>
+                                <option value="">Select role...</option>
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createUser()">Create User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil me-2"></i>Edit User
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="editFirstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="editLastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRole" class="form-label">Role</label>
+                            <select class="form-select" id="editRole" required>
+                                <option value="student">Student</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password (optional)</label>
+                            <input type="password" class="form-control" id="newPassword">
+                            <small class="text-muted">Leave blank to keep current password</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateUser()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Authentication Utils -->
+    <script src="../assets/js/auth-utils.js"></script>
+
+    <script>
+        let allUsers = [];
+        let filteredUsers = [];
+
+        // Load users on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchUsers').addEventListener('input', filterUsers);
+            document.getElementById('filterRole').addEventListener('change', filterUsers);
+            document.getElementById('sortBy').addEventListener('change', sortUsers);
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users', {
+                    headers: {
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+
+                allUsers = await response.json();
+                filteredUsers = [...allUsers];
+                displayUsers();
+                updateStatistics();
+
+            } catch (error) {
+                console.error('Load users error:', error);
+                showError('Failed to load users');
+            }
+        }
+
+        function updateStatistics() {
+            const students = allUsers.filter(u => u.role === 'student').length;
+            const teachers = allUsers.filter(u => u.role === 'teacher').length;
+            const admins = allUsers.filter(u => u.role === 'admin').length;
+
+            document.getElementById('totalUsers').textContent = allUsers.length;
+            document.getElementById('totalStudents').textContent = students;
+            document.getElementById('totalTeachers').textContent = teachers;
+            document.getElementById('totalAdmins').textContent = admins;
+        }
+
+        function displayUsers() {
+            const loading = document.getElementById('usersLoading');
+            const table = document.getElementById('usersTable');
+            const empty = document.getElementById('usersEmpty');
+            const tbody = document.getElementById('usersTableBody');
+
+            loading.style.display = 'none';
+
+            if (filteredUsers.length === 0) {
+                table.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            table.style.display = 'block';
+
+            tbody.innerHTML = filteredUsers.map(user => {
+                const roleClass = user.role === 'admin' ? 'danger' :
+                                 user.role === 'teacher' ? 'info' : 'success';
+                const createdDate = new Date(user.created_at).toLocaleDateString();
+                const lastActive = user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never';
+
+                return `
+                    <tr>
+                        <td>
+                            <i class="bi bi-person-circle me-2"></i>
+                            ${user.first_name} ${user.last_name}
+                        </td>
+                        <td>${user.email}</td>
+                        <td>
+                            <span class="badge bg-${roleClass}">
+                                ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                            </span>
+                        </td>
+                        <td>${createdDate}</td>
+                        <td>${lastActive}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editUser(${user.id})" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteUser(${user.id}, '${user.first_name} ${user.last_name}')" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
+            const roleFilter = document.getElementById('filterRole').value;
+
+            filteredUsers = allUsers.filter(user => {
+                const matchesSearch = !searchTerm ||
+                    user.first_name.toLowerCase().includes(searchTerm) ||
+                    user.last_name.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm);
+
+                const matchesRole = !roleFilter || user.role === roleFilter;
+
+                return matchesSearch && matchesRole;
+            });
+
+            sortUsers();
+            displayUsers();
+        }
+
+        function sortUsers() {
+            const sortBy = document.getElementById('sortBy').value;
+
+            filteredUsers.sort((a, b) => {
+                switch (sortBy) {
+                    case 'name':
+                        return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`);
+                    case 'email':
+                        return a.email.localeCompare(b.email);
+                    case 'role':
+                        return a.role.localeCompare(b.role);
+                    case 'created':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    default:
+                        return 0;
+                }
+            });
+
+            displayUsers();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchUsers').value = '';
+            document.getElementById('filterRole').value = '';
+            document.getElementById('sortBy').value = 'name';
+            filteredUsers = [...allUsers];
+            sortUsers();
+            displayUsers();
+        }
+
+        async function createUser() {
+            const form = document.getElementById('addUserForm');
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                role: document.getElementById('role').value
+            };
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create user');
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+                form.reset();
+                showSuccess('User created successfully');
+                loadUsers();
+
+            } catch (error) {
+                console.error('Create user error:', error);
+                showError(error.message);
+            }
+        }
+
+        function editUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editFirstName').value = user.first_name;
+            document.getElementById('editLastName').value = user.last_name;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editRole').value = user.role;
+            document.getElementById('newPassword').value = '';
+
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+
+        async function updateUser() {
+            const userId = document.getElementById('editUserId').value;
+            const updateData = {
+                firstName: document.getElementById('editFirstName').value,
+                lastName: document.getElementById('editLastName').value,
+                email: document.getElementById('editEmail').value,
+                role: document.getElementById('editRole').value
+            };
+
+            const newPassword = document.getElementById('newPassword').value;
+            if (newPassword) {
+                updateData.password = newPassword;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update user');
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                showSuccess('User updated successfully');
+                loadUsers();
+
+            } catch (error) {
+                console.error('Update user error:', error);
+                showError('Failed to update user');
+            }
+        }
+
+        function confirmDeleteUser(userId, userName) {
+            if (confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+                deleteUser(userId);
+            }
+        }
+
+        async function deleteUser(userId) {
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete user');
+                }
+
+                showSuccess('User deleted successfully');
+                loadUsers();
+
+            } catch (error) {
+                console.error('Delete user error:', error);
+                showError('Failed to delete user');
+            }
+        }
+
+        function showSuccess(message) {
+            alert(message); // Replace with toast notification
+        }
+
+        function showError(message) {
+            alert('Error: ' + message); // Replace with toast notification
+        }
+    </script>
+</body>
+</html>
