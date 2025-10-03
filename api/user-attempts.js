@@ -68,8 +68,23 @@ module.exports = async function handler(req, res) {
     try {
         const user = verifyToken(req);
 
-        // Users can only view their own attempts
-        const attempts = await getUserAttempts(user.id);
+        // Get userId from query params or use logged-in user's ID
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const requestedUserId = url.searchParams.get('userId');
+
+        let targetUserId = user.id; // Default to logged-in user
+
+        // Teachers and admins can view other users' attempts
+        if (requestedUserId && (user.role === 'teacher' || user.role === 'admin')) {
+            targetUserId = parseInt(requestedUserId);
+        } else if (requestedUserId && user.role === 'student') {
+            // Students can only view their own attempts
+            return res.status(403).json({
+                error: 'Access denied. You can only view your own attempts.'
+            });
+        }
+
+        const attempts = await getUserAttempts(targetUserId);
 
         return res.status(200).json({
             success: true,
