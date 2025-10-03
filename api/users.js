@@ -203,10 +203,29 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // Check if it's a user ID (for DELETE/PUT operations)
+        // Check if it's a user ID (for GET/DELETE/PUT operations)
         const userId = parseInt(lastPart);
         if (!isNaN(userId)) {
-            if (req.method === 'DELETE') {
+            if (req.method === 'GET') {
+                // GET /api/users/:id - get single user
+                const userResult = await sql`
+                    SELECT
+                        u.id, u.email, u.first_name, u.last_name, u.role, u.student_id, u.created_at,
+                        COALESCE(u.last_login, u.created_at) as last_login,
+                        COALESCE(u.is_active, true) as is_active
+                    FROM users u
+                    WHERE u.id = ${userId}
+                `;
+
+                if (userResult.rows.length === 0) {
+                    return res.status(404).json({ error: 'User not found' });
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    user: userResult.rows[0]
+                });
+            } else if (req.method === 'DELETE') {
                 // DELETE /api/users/:id
                 // Prevent admin from deleting themselves
                 if (userId === user.id) {
