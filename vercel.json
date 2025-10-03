@@ -18,10 +18,10 @@
     "api/init-db.js": {
       "maxDuration": 60
     },
-    "api/stats.js": {
+    "api/analytics.js": {
       "maxDuration": 30
     },
-    "api/progress.js": {
+    "api/student-data.js": {
       "maxDuration": 30
     },
     "api/create-admin.js": {
@@ -30,7 +30,7 @@
     "api/users.js": {
       "maxDuration": 30
     },
-    "api/user-attempts.js": {
+    "api/users/[id].js": {
       "maxDuration": 30
     }
   },
