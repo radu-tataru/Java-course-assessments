@@ -94,6 +94,7 @@ class DatabaseAssessmentEngine {
                 }
 
                 this.startTime = new Date();
+                this.showBottomNav();
                 this.renderCurrentQuestion();
 
             } else {
@@ -185,6 +186,9 @@ class DatabaseAssessmentEngine {
 
         // Update progress indicator
         this.updateProgressIndicator();
+
+        // Update bottom navigation buttons
+        this.updateBottomNav();
     }
 
     /**
@@ -809,6 +813,59 @@ class DatabaseAssessmentEngine {
         if (progressPercent) {
             progressPercent.textContent = Math.round(progressPercentage) + '%';
         }
+    }
+
+    showBottomNav() {
+        const bottomNavBar = document.getElementById('bottomNavBar');
+        if (bottomNavBar) {
+            bottomNavBar.style.display = 'block';
+            document.body.classList.add('assessment-active');
+        }
+    }
+
+    hideBottomNav() {
+        const bottomNavBar = document.getElementById('bottomNavBar');
+        if (bottomNavBar) {
+            bottomNavBar.style.display = 'none';
+            document.body.classList.remove('assessment-active');
+        }
+    }
+
+    updateBottomNav() {
+        const navContainer = document.getElementById('navigationButtons');
+        if (!navContainer) return;
+
+        const isFirst = this.currentQuestionIndex === 0;
+        const isLast = this.currentQuestionIndex === this.questions.length - 1;
+        const question = this.questions[this.currentQuestionIndex];
+
+        navContainer.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <button class="btn btn-outline-secondary ${isFirst ? 'invisible' : ''}"
+                        ${isFirst ? 'disabled' : ''}
+                        data-prev-question>
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+
+                <div class="text-center">
+                    <button class="btn btn-success" data-save-answer>
+                        <i class="bi bi-check-circle"></i> Save Answer
+                    </button>
+                </div>
+
+                ${isLast ? `
+                    <button class="btn btn-primary" data-submit-assessment>
+                        <i class="bi bi-check-square"></i> Submit Assessment
+                    </button>
+                ` : `
+                    <button class="btn btn-primary" data-next-question>
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                `}
+            </div>
+        `;
+
+        this.setupQuestionEventListeners(question);
     }
 
     // Utility methods

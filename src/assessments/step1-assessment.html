@@ -197,6 +197,23 @@
             color: white;
         }
 
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 2px solid #e9ecef;
+            padding: 1rem 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        /* Add padding to body to prevent content from being hidden behind fixed bar */
+        body.assessment-active {
+            padding-bottom: 80px;
+        }
+
         .alert-auth {
             border-radius: 12px;
             border: none;
@@ -283,6 +300,13 @@
 
             <!-- Assessment Questions (will be populated by JS) -->
             <div id="questionContainer" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Fixed Bottom Navigation Bar -->
+    <div id="bottomNavBar" class="bottom-nav-bar" style="display: none;">
+        <div class="container">
+            <div id="navigationButtons"></div>
         </div>
     </div>
 
