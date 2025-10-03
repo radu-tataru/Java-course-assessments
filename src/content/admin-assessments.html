@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Management - Admin</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="../assets/css/assessment-styles.css" rel="stylesheet">
+</head>
+<body style="background: white; padding: 0; margin: 0;">
+    <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card text-white" style="background: linear-gradient(135deg, #dc3545, #6c757d);">
+                    <div class="card-body py-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="mb-2">
+                                    <i class="bi bi-file-text me-2"></i>
+                                    Assessment Management
+                                </h2>
+                                <p class="lead mb-0">Configure and manage course assessments</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addAssessmentModal">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-primary mb-2">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="totalAssessments">0</h5>
+                        <small class="text-muted">Total Assessments</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-success mb-2">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="activeAssessments">0</h5>
+                        <small class="text-muted">Active</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-warning mb-2">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="totalAttempts">0</h5>
+                        <small class="text-muted">Total Attempts</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="display-6 text-info mb-2">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                        <h5 class="card-title mb-1" id="avgScore">0%</h5>
+                        <small class="text-muted">Average Score</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessments List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-table me-2"></i>Available Assessments
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Loading state -->
+                        <div id="assessmentsLoading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="mt-2">Loading assessments...</div>
+                        </div>
+
+                        <!-- Assessments table -->
+                        <div id="assessmentsTable" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Step</th>
+                                            <th>Title</th>
+                                            <th>Questions</th>
+                                            <th>Duration</th>
+                                            <th>Attempts</th>
+                                            <th>Avg Score</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assessmentsTableBody">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Empty state -->
+                        <div id="assessmentsEmpty" style="display: none;" class="text-center py-5">
+                            <i class="bi bi-file-text text-muted" style="font-size: 4rem;"></i>
+                            <p class="text-muted mt-3">No assessments found</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssessmentModal">
+                                <i class="bi bi-plus-circle me-1"></i>Create First Assessment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Attempts Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>Recent Assessment Attempts
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentAttempts">
+                            <div class="text-center text-muted py-3">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2">Loading recent attempts...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Assessment Modal -->
+    <div class="modal fade" id="addAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Assessment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Note:</strong> Assessment creation is currently managed through the data files.
+                        Contact the system administrator to add new assessments.
+                    </div>
+                    <p>To add a new assessment:</p>
+                    <ol>
+                        <li>Create a question JSON file in <code>data/questions/stepX-questions.json</code></li>
+                        <li>Run the database initialization to add the assessment</li>
+                        <li>Create the corresponding HTML page in <code>src/assessments/</code></li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div class="modal fade" id="viewDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-info-circle me-2"></i>Assessment Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="assessmentDetailsContent">
+                    <!-- Populated dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Authentication Utils -->
+    <script src="../assets/js/auth-utils.js"></script>
+
+    <script>
+        let allAssessments = [];
+        let allAttempts = [];
+
+        // Load assessments on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAssessments();
+            loadRecentAttempts();
+        });
+
+        async function loadAssessments() {
+            try {
+                const response = await fetch('/api/assessments', {
+                    headers: {
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load assessments');
+                }
+
+                const data = await response.json();
+                allAssessments = Array.isArray(data) ? data : (data.assessments || []);
+                displayAssessments();
+                updateStatistics();
+
+            } catch (error) {
+                console.error('Load assessments error:', error);
+                showError('Failed to load assessments');
+            }
+        }
+
+        async function loadRecentAttempts() {
+            try {
+                const response = await fetch('/api/user-attempts', {
+                    headers: {
+                        'Authorization': `Bearer ${authUtils.getToken()}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    allAttempts = Array.isArray(data) ? data : (data.attempts || []);
+                    displayRecentAttempts();
+                }
+            } catch (error) {
+                console.error('Load attempts error:', error);
+            }
+        }
+
+        function updateStatistics() {
+            const active = allAssessments.filter(a => a.is_active !== false).length;
+            const totalAttempts = allAttempts.length;
+            const completedAttempts = allAttempts.filter(a => a.status === 'completed');
+            const avgScore = completedAttempts.length > 0
+                ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / completedAttempts.length)
+                : 0;
+
+            document.getElementById('totalAssessments').textContent = allAssessments.length;
+            document.getElementById('activeAssessments').textContent = active;
+            document.getElementById('totalAttempts').textContent = totalAttempts;
+            document.getElementById('avgScore').textContent = avgScore + '%';
+        }
+
+        function displayAssessments() {
+            const loading = document.getElementById('assessmentsLoading');
+            const table = document.getElementById('assessmentsTable');
+            const empty = document.getElementById('assessmentsEmpty');
+            const tbody = document.getElementById('assessmentsTableBody');
+
+            loading.style.display = 'none';
+
+            if (allAssessments.length === 0) {
+                table.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            table.style.display = 'block';
+
+            tbody.innerHTML = allAssessments.map(assessment => {
+                const attempts = allAttempts.filter(a => a.assessment_id === assessment.id);
+                const completedAttempts = attempts.filter(a => a.status === 'completed');
+                const avgScore = completedAttempts.length > 0
+                    ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / completedAttempts.length)
+                    : 0;
+
+                const statusBadge = assessment.is_active !== false
+                    ? '<span class="badge bg-success">Active</span>'
+                    : '<span class="badge bg-secondary">Inactive</span>';
+
+                return `
+                    <tr>
+                        <td><span class="badge bg-primary">Step ${assessment.step_number || assessment.id}</span></td>
+                        <td>
+                            <strong>${assessment.title}</strong>
+                            <br><small class="text-muted">${assessment.description || ''}</small>
+                        </td>
+                        <td>${assessment.question_count || 0} questions</td>
+                        <td>${assessment.time_limit || 0} min</td>
+                        <td>${attempts.length} attempts</td>
+                        <td>${avgScore}%</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-info" onclick="viewDetails(${assessment.id})" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editAssessment(${assessment.id})" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-${assessment.is_active !== false ? 'warning' : 'success'}"
+                                    onclick="toggleStatus(${assessment.id})"
+                                    title="${assessment.is_active !== false ? 'Deactivate' : 'Activate'}">
+                                <i class="bi bi-${assessment.is_active !== false ? 'pause' : 'play'}-circle"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function displayRecentAttempts() {
+            const container = document.getElementById('recentAttempts');
+
+            if (allAttempts.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-clock-history"></i>
+                        <div class="mt-2">No recent attempts</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const recentAttempts = allAttempts
+                .sort((a, b) => new Date(b.started_at) - new Date(a.started_at))
+                .slice(0, 10);
+
+            container.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Assessment</th>
+                                <th>Status</th>
+                                <th>Score</th>
+                                <th>Started</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${recentAttempts.map(attempt => {
+                                const statusClass = attempt.status === 'completed' ? 'success' :
+                                                   attempt.status === 'in_progress' ? 'warning' : 'secondary';
+                                const startedDate = new Date(attempt.started_at).toLocaleString();
+                                const duration = attempt.completed_at
+                                    ? Math.round((new Date(attempt.completed_at) - new Date(attempt.started_at)) / 60000) + ' min'
+                                    : '-';
+
+                                return `
+                                    <tr>
+                                        <td>${attempt.user_name || 'Unknown'}</td>
+                                        <td>Step ${attempt.assessment_step || attempt.assessment_id}</td>
+                                        <td><span class="badge bg-${statusClass}">${attempt.status}</span></td>
+                                        <td>${attempt.score !== null && attempt.score !== undefined ? attempt.score + '%' : '-'}</td>
+                                        <td>${startedDate}</td>
+                                        <td>${duration}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function viewDetails(assessmentId) {
+            const assessment = allAssessments.find(a => a.id === assessmentId);
+            if (!assessment) return;
+
+            const attempts = allAttempts.filter(a => a.assessment_id === assessmentId);
+            const completedAttempts = attempts.filter(a => a.status === 'completed');
+
+            const content = `
+                <h5>${assessment.title}</h5>
+                <p class="text-muted">${assessment.description || 'No description available'}</p>
+
+                <h6 class="mt-4">Assessment Details</h6>
+                <ul>
+                    <li><strong>Step:</strong> ${assessment.step_number || assessment.id}</li>
+                    <li><strong>Questions:</strong> ${assessment.question_count || 0}</li>
+                    <li><strong>Time Limit:</strong> ${assessment.time_limit || 0} minutes</li>
+                    <li><strong>Status:</strong> ${assessment.is_active !== false ? 'Active' : 'Inactive'}</li>
+                </ul>
+
+                <h6 class="mt-4">Statistics</h6>
+                <ul>
+                    <li><strong>Total Attempts:</strong> ${attempts.length}</li>
+                    <li><strong>Completed:</strong> ${completedAttempts.length}</li>
+                    <li><strong>In Progress:</strong> ${attempts.filter(a => a.status === 'in_progress').length}</li>
+                    <li><strong>Average Score:</strong> ${completedAttempts.length > 0
+                        ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / completedAttempts.length) + '%'
+                        : 'N/A'}</li>
+                </ul>
+            `;
+
+            document.getElementById('assessmentDetailsContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('viewDetailsModal')).show();
+        }
+
+        function editAssessment(assessmentId) {
+            alert('Assessment editing is currently managed through the data files. Contact the system administrator.');
+        }
+
+        function toggleStatus(assessmentId) {
+            alert('Assessment status toggle will be implemented in a future update.');
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+    </script>
+</body>
+</html>
