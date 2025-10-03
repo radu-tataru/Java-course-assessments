@@ -198,7 +198,7 @@
 
             tbody.innerHTML = attempts.map(attempt => {
                 const statusBadge = getStatusBadge(attempt.status);
-                const score = attempt.status === 'completed' ? `${attempt.score}%` : '-';
+                const score = (attempt.status === 'submitted' || attempt.status === 'graded') ? `${attempt.score}%` : '-';
                 const duration = attempt.duration ? formatDuration(attempt.duration) : '-';
                 const actions = getActionButtons(attempt);
 
@@ -220,9 +220,9 @@
 
         function updateStatistics(attempts) {
             const total = attempts.length;
-            const completed = attempts.filter(a => a.status === 'completed').length;
+            const completed = attempts.filter(a => a.status === 'submitted' || a.status === 'graded').length;
             const inProgress = attempts.filter(a => a.status === 'in_progress').length;
-            const scores = attempts.filter(a => a.status === 'completed' && a.score).map(a => a.score);
+            const scores = attempts.filter(a => (a.status === 'submitted' || a.status === 'graded') && a.score).map(a => a.score);
             const bestScore = scores.length > 0 ? Math.max(...scores) : null;
 
             document.getElementById('totalAttempts').textContent = total;
@@ -233,7 +233,8 @@
 
         function getStatusBadge(status) {
             switch (status) {
-                case 'completed':
+                case 'submitted':
+                case 'graded':
                     return '<span class="badge bg-success">Completed</span>';
                 case 'in_progress':
                     return '<span class="badge bg-warning">In Progress</span>';
